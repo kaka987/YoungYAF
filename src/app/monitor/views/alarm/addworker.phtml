@@ -1,0 +1,147 @@
+<?php
+	$this->title = '计算插件管理 - 业务监控系统';
+	$this->sideMenu = 'admin';
+	$this->subMenu = 'alarm_worker';
+?>
+
+<style type="text/css">
+label{
+	display: inline-block;
+	float: left;
+	font-weight: 600;
+	cursor: auto;
+	font-size: 12px;
+	width: 150px;
+	text-align: left;
+}
+
+.field-box {
+	margin-bottom: 30px;
+	margin-left: 0;
+	float: left;
+	width: 100%;
+}
+#config-back {
+	margin-left:10px;
+}
+
+a {
+	cursor:pointer;
+}
+
+</style>
+<div class="container-fluid">
+            <div id="pad-wrapper" class="form-page">
+            	<h3>计算插件管理-<?php if(isset($D['id'])) echo '编辑';else echo '新增';?></h3>
+            	<hr/>
+                <div class="row-fluid form-wrapper">
+                    <!-- left column -->
+                    <div class="span10 column">
+                        <form id="monitor-config-form" class="form-horizontal" role="form" onsubmit="return SubmitForm(this);" />
+                            <input type="hidden" id="id" value="<?php echo isset($D['id'])?$D['id']:'';?>" /> 
+                                                        
+                            <div class="field-box">
+                                <label>计算名称:</label>
+                                <input id="name" class="span5 inline-input"
+                                       value="<?php echo (isset($D['name']) AND $D['name']) ? $D['name']:'';?>"
+                                       data-toggle="tooltip" data-trigger="focus"
+                                       title="计算名称（仅仅标识计算名称）" data-placement="right" type="text" />
+                            </div>
+
+
+                            <div class="field-box">
+                                <label>数据对象:</label>
+                                <input id="cmd" class="span5 inline-input"
+                                       value="<?php echo (isset($D['cmd']) AND $D['cmd']) ? $D['cmd']:'';?>"
+                                       data-toggle="tooltip" data-trigger="focus"
+                                       title="数据对象(指向的数据对象表名)" data-placement="right" type="text" />
+                            </div>
+
+                            <div class="field-box">
+                                <label>计算参数:</label>
+                                <input id="argvs" class="span5 inline-input"
+                                       value="<?php echo (isset($D['argvs']) AND $D['argvs']) ? $D['argvs']:'';?>"
+                                       data-toggle="tooltip" data-trigger="focus"
+                                       title="计算参数" data-placement="right" type="text" />
+                            </div>
+
+                            <div class="field-box">
+                                <label>备注说明:</label>
+                                <textarea id="desc" class="span8" rows="4"><?php echo (isset($D['desc']) AND $D['desc'])?$D['desc']:'';?></textarea>
+                            </div>
+                            
+                            <button id="config-submit" type="button" class="btn btn-default btn-primary">提交</button>
+                            <a id="config-back" href="/alarm/worker">返回</a>
+                        	<div id="tip_submit" class="alert alert-success" style="visibility:hidden;margin-top:10px;font-size:18px;"></div>
+                        </form>
+                        
+                    </div>
+					<!-- end form -->
+                </div>
+            </div>
+        </div>
+        
+<div id="suc" title="" style="visibility:hidden;text-align:center;">
+	<h3>提交成功！</h3>
+	<span></span>
+</div>        
+
+<script type="text/javascript">
+$(function () {
+	
+	$("#config-submit").click(function(){
+		SubmitForm();
+	});
+
+	$("#monitor_test").click(function(){
+		$.ajax({
+			url:testurl,
+		    type:'get',
+		    dataType: 'json',
+		 	data: testparam,
+		 	async: false,
+		 	success: function(data){
+			 	if(data.flag == 'success') {
+			 		$("#monitor_result").html(JSON.stringify(data.data));
+				} else if(data.flag == 'error') {
+					$("#monitor_result").html(JSON.stringify(data.msg));
+				} else {
+					$("#monitor_result").html('Unknow error!');
+				}
+	       	}
+		});
+	});
+	
+});
+
+function SubmitForm(obj) {
+	var configData = {
+			id				: $("#id").val(),
+			name		    : $("#name").val(),
+			cmd			    : $("#cmd").val(),
+			argvs			: $("#argvs").val(),
+            desc		    : $("#desc").val()
+			};
+	//console.log(configData);
+	//提交数据
+	$.ajax({
+		url:'/alarm/worker?o=add',
+	    type:'post',
+	    dataType: 'json',
+	 	data: configData,
+	 	async: false,
+	 	success: function(data){
+            //console.log(data.flag);
+            $("#tip_submit").css('visibility','visible').attr('class','alert alert-'+data.flag).html(data.msg);
+       	}
+	});
+}
+
+function jqchk(name){  //jquery获取复选框值    
+	  var chk_value =[];    
+	  $('input[name="'+name+'"]:checked').each(function(){    
+		  chk_value.push($(this).val());    
+	  });    
+	  return chk_value.length==0 ? '' : chk_value;   
+}    
+</script>

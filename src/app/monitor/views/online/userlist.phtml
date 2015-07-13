@@ -1,0 +1,99 @@
+<?php
+	$this->title = '在线列表 - 业务监控系统';
+    $this->sideMenu = 'userOnline';
+?>
+<div class="container-fluid">
+<div id="pad-wrapper" class="users-list">
+<div class="row-fluid header">
+    <h3>在线用户</h3>
+    <div class="span10 pull-right">
+        <input type="text" id="search_email" class="span5 search" placeholder="输入邮箱地址...">
+    </div>
+</div>
+
+<!-- Users table -->
+<div class="row-fluid table">
+    <table class="table table-hover">
+        <thead>
+        <tr>
+            <th class="span4 sortable">
+                姓名
+            </th>
+            <th class="span3 sortable">
+                <span class="line"></span>邮箱
+            </th>
+            <th class="span3 sortable">
+                <span class="line"></span>IP
+            </th>
+            <th class="span2 sortable">
+                <span class="line"></span>在线时间
+            </th>
+            <th class="span3 sortable align-right">
+                <span class="line"></span>活动时间
+            </th>
+        </tr>
+        </thead>
+        <tbody>
+        <?php
+            foreach($userList as $k=>$v) {
+                $totalTime = Sys_Tools::convertSecond($v['total_time']);
+                $v['total_time'] = '';
+                if($totalTime['year'] > 0) {
+                    $v['total_time'] .= $totalTime['year'] .'年';
+                }
+                if($totalTime['month'] > 0) {
+                    $v['total_time'] .= $totalTime['month'] .'月';
+                }
+                if($totalTime['day'] > 0) {
+                    $v['total_time'] .= $totalTime['day'] .'日';
+                }
+                if($totalTime['hour'] > 0) {
+                    $v['total_time'] .= $totalTime['hour'] .'小时';
+                }
+                if($totalTime['minute'] > 0) {
+                    $v['total_time'] .= $totalTime['minute'] .'分';
+                }
+                if($totalTime['second'] > 0) {
+                    $v['total_time'] .= $totalTime['second'] .'秒';
+                }
+        ?>
+        <tr class="first">
+            <td>
+                <?php echo $v['alias_name'] . $v['full_name'] ?>
+            </td>
+            <td>
+                <?php echo $v['email'] ?>
+            </td>
+            <td>
+                <a href="http://www.ip138.com/ips138.asp?ip=<?php echo $v['ip'] ?>" target="_blank"><?php echo $v['ip'] ?></a>
+            </td>
+            <td>
+                <?php echo $v['total_time'] ?>
+            </td>
+            <td class="align-right">
+                <?php echo date('Y-m-d H:i:s', $v['active_time']) ?>
+            </td>
+        </tr>
+        <?php } ?>
+        </tbody>
+    </table>
+</div>
+<div class="pagination pull-right">
+    <ul>
+        <li><a href="/analytics/user/index?page=<?php echo $prevPage ?>">‹</a></li>
+        <?php
+            for($i = 1; $i <= $pageNum; $i++) {
+                if($page == $i) {
+                    echo '<li><a class="active" href="/analytics/user/index?page='. $i .'">'. $i .'</a></li>';
+                } else {
+                    echo '<li><a href="/analytics/user/index?page='. $i .'">'. $i .'</a></li>';
+                }
+            }
+        ?>
+        <li><a href="/analytics/user/index?page=<?php echo $nextPage ?>">›</a></li>
+    </ul>
+</div>
+<!-- end users table -->
+</div>
+</div>
+<script type="text/javascript" src="/static/js/analytics.js"></script>

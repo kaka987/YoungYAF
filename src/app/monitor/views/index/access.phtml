@@ -1,0 +1,100 @@
+<?php
+	$this->title = '访问详情 - 业务监控系统';
+    $this->sideMenu = 'access';
+    $this->currentDate = $this->date ? $this->date : date('Y-m-d');
+?>
+<div class="container-fluid">
+
+    <div class="skins-nav">
+        <a href="javascript:;" class="skin second_nav" onclick="javascript:$('#requests_map').animatescroll();">
+            <span class="text">请求次数地图</span>
+        </a>
+        <a href="javascript:;" class="skin second_nav" onclick="javascript:$('#requests_top_ten').animatescroll();">
+            <span class="text">请求次数前10</span>
+        </a>
+        <a href="javascript:;" class="skin second_nav" onclick="javascript:$('#ip_requests_top_ten').animatescroll();">
+            <span class="text">IP请求次数前10</span>
+        </a>
+        <a href="javascript:;" class="skin second_nav" onclick="javascript:$('#ip_response_time_top_ten').animatescroll();">
+            <span class="text">IP响应耗时前10</span>
+        </a>
+    </div>
+
+    <div id="monitor_history">
+        <div class="form">
+            <div class="title_section">
+                监控时间：<span class="bold"><?php echo $this->currentDate ?></span>
+            </div>
+            <div class="first_section left">
+                <i>日期</i><div id="first_date"></div>
+            </div>
+            <div class="from_section left" style="display: none">
+                <i>开始</i><span id="from_date"></span>
+            </div>
+            <div class="to_section left"  style="display: none">
+                <i>结束</i><span id="to_date"></span>
+            </div>
+            <div class="choose_section left">
+                <p><input type="radio" name="type" value="day" checked="checked" />按日</p>
+                <p><input type="radio" name="type" value="between" />时间段</p>
+                <p><button id="applyBetween" type="button" class="btn btn-primary btn-mini" style="display: none">应用时间段</button></p>
+            </div>
+        </div>
+    </div>
+
+	<div id="pad-wrapper">
+        <i id="requests_map"></i>
+        <div class="monitor-history form">
+            <div class="monitor-time">监控时间：<span class="bold"><?php echo $this->currentDate ?></span><i class="icon-calendar pointer"></i></div>
+        </div>
+
+        <div class="row-fluid">
+            <div class="span12">
+                <h4 class="title">
+                Request statistic map（请求统计地图）
+                    <div class="btn-group pull-right map-request">
+                        <button class="glow left active number">Number（请求次数）</button>
+                        <button class="glow right time">Time（响应耗时）</button>
+                    </div>
+                </h4>
+                <div class="report requests-map" id="requestsMap"></div>
+            </div>
+        </div>
+
+        <i id="requests_top_ten"></i>
+        <div class="row-fluid section">
+            <div class="span12">
+                <h4 class="title">Requests top 10（请求次数前10）</h4>
+                <div class="report" id="rgTopTen"><div class="report-loader"><img src="/static/images/ajax-loader.gif" /></div></div>
+            </div>
+        </div>
+
+        <i id="ip_requests_top_ten"></i>
+        <div class="row-fluid section" >
+            <div class="span12">
+                <h4 class="title">IP requests top 10（IP请求次数前10）</h4>
+                <div class="report" id="ripTopTen"><div class="report-loader"><img src="/static/images/ajax-loader.gif" /></div></div>
+            </div>
+        </div>
+
+        <i id="ip_response_time_top_ten"></i>
+        <div class="row-fluid section" >
+            <div class="span12">
+                <h4 class="title">IP response time top 10（IP响应耗时前10）</h4>
+                <div class="report" id="rtcTopTen"><div class="report-loader"><img src="/static/images/ajax-loader.gif" /></div></div>
+            </div>
+        </div>
+
+    </div>
+</div>
+<input type="hidden" value="hide" id="history_status"/>
+<input type="hidden" value="<?php echo $this->period ?>" id="history_period"/>
+<input type="hidden" value="<?php echo $this->date ?>" id="history_date"/>
+<input type="hidden" value="ON" id="scrollSwitch"/>
+<!-- scripts for this page -->
+<script type="text/javascript" src="/static/js/jquery.scrollUp.min.js"></script>
+<script type="text/javascript" src="/static/js/highcharts/modules/map.js"></script>
+<script type="text/javascript" src="/static/js/highcharts/modules/data.js"></script>
+<script type="text/javascript" src="/static/js/highcharts/highmaps-data-world.js"></script>
+<script type="text/javascript" src="/static/js/access.js"></script>
+<script type="text/javascript" src="/static/js/My97DatePicker/WdatePicker.js"></script>

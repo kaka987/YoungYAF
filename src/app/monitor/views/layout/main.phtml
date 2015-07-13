@@ -1,0 +1,325 @@
+<?php
+    $this->nowDate = date('Y-m-d H:i:s');
+
+    //$this->loginInfo = User_Session::getLoginCookie();
+
+    $sideMenu = isset($sideMenu) ? $sideMenu : '';
+    $subMenu  = isset($subMenu) ? $subMenu : '';
+
+    $settingModel = new Model_User_Setting();
+
+    $setIds = isset($_COOKIE['url_ids']) ? $_COOKIE['url_ids'] : NULL;
+
+    $businessSetting = $settingModel->getBusinessSetting($setIds);
+
+?>
+<!DOCTYPE html>
+<html>
+<head>
+
+    <title><?php echo $this->title; ?></title>
+    <meta charset=utf-8>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- bootstrap -->
+    <link href="/static/css/bootstrap/bootstrap.css" rel="stylesheet" />
+    <link href="/static/css/bootstrap/bootstrap-responsive.css" rel="stylesheet" />
+    <link href="/static/css/bootstrap/bootstrap-overrides.css" type="text/css" rel="stylesheet" />
+    <link rel="shortcut icon" href="/static/favicon.ico" type="image/vnd.microsoft.icon">
+    <link rel="icon" href="/static/favicon.png" type="image/png">
+
+
+    <!-- global styles -->
+    <link rel="stylesheet" type="text/css" href="/static/css/layout.css" />
+    <link rel="stylesheet" type="text/css" href="/static/css/elements.css" />
+    <link rel="stylesheet" type="text/css" href="/static/css/icons.css" />
+
+    <link href="/static/css/lib/font-awesome.css" type="text/css" rel="stylesheet" />
+
+<!--    <link href="http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" rel="stylesheet" type="text/css">-->
+
+    <!-- this page specific styles -->
+    <link rel="stylesheet" href="/static/css/compiled/index.css" type="text/css" media="screen" />
+    <link rel="stylesheet" href="/static/css/flipclock.css" type="text/css" media="screen" />
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <style type="text/css">
+    .report { margin-top: 15px;}
+    .requests-map { height: 550px; }
+    .head-btn button {  padding: 1px 5px; }
+    .report-loader { text-align: center; padding-top: 134px; padding-bottom: 134px; }
+    .white-popup {position: relative;background: #FFF;padding: 20px;width: auto;max-width: 960px;margin: 20px auto;}
+    ul.flip {width: 22px;height: 25px;font-size: 22px;line-height: 25px;}
+    ul.flip li{line-height: normal;}
+    .show-date {font:bold 16px "Helvetica Neue", Helvetica, sans-serif; font-style: italic; padding-top:13px; color:#f0f0f0;  float: left;padding-right: 20px;}
+    .navbar-inverse .brand { padding:10px 0px 0px 10px;}
+    .navbar-inverse {
+        border-radius: 0px;
+        border-bottom: 1px solid #191e23;
+        background: #2c3742;
+        background: -moz-linear-gradient(top, #2c3742 0%, #28303a 100%);
+        background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#2c3742), color-stop(100%,#28303a));
+        background: -webkit-linear-gradient(top, #2c3742 0%,#28303a 100%);
+        background: -o-linear-gradient(top, #2c3742 0%,#28303a 100%);
+        background: -ms-linear-gradient(top, #2c3742 0%,#28303a 100%);
+        background: linear-gradient(to bottom, #2c3742 0%,#28303a 100%);
+        filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#2c3742', endColorstr='#28303a',GradientType=0 );
+    }
+    a.nav-font { font-size:14px;  color:#ffffff !important; }
+    .show-region { font-size:18px; padding-top:2em; padding-bottom:1em; text-align: center; color:#ff0000; }
+    #sidebar-nav { padding-top: 0px; }
+    body {padding-top: 48px;}
+    .navbar-inner {  margin-right: auto;  margin-left: auto;  }
+    .navbar-fixed-top .navbar-inner {padding-right: 20px; padding-left: 20px; }
+    .form input[type="text"] {margin-bottom: 0px; height: 17px; width: 80px; margin-right: 2px; font-size: 13px; -webkit-box-shadow: inset 0 0px 1px rgba(0, 0, 0, 0.075); -moz-box-shadow: inset 0 0px 1px rgba(0, 0, 0, 0.075); box-shadow: inset 0 0px 1px rgba(0, 0, 0, 0.075);}
+    .form i { padding-right:8px; font-style: normal;}
+    .monitor-history {padding-bottom: 60px;}
+    #monitor_history {position: absolute;top: 35px;left: 40px;float: left;z-index: 3000; border:1px solid #cccccc; background: #ffffff;padding:10px; display: none;}
+    #monitor_history .left { float: left; margin-right:15px; }
+    #monitor_history .first_section, #monitor_history .from_section, #monitor_history .to_section { width: 200px; display: inline-block;}
+    .monitor-time {float: left;cursor: pointer; border:1px solid #ccc;padding:3px 10px;}
+    .monitor-time .bold, #monitor_history .bold {font-weight:bold;}
+    .monitor-time .pointer {padding-left:10px;}
+    .choose_section input[type="radio"] {margin: 0px}
+    #modal {width:100%;height: 100%;position:fixed;left: 0;top:0;z-index:2000; /*opacity:0.7; background: #333333;*/ }
+    #monitor_history iframe {width: 202px; height: 196px;}
+    /* reset layout.css */
+    /*#pad-wrapper { margin-top:35px }*/
+    #scrollUp-active{display:none}
+    #scrollUp {bottom: 20px;right: 20px;height: 38px;  /* Height of image */width: 38px; /* Width of image */ background:url(/static/img/top.png) no-repeat }
+    .table-wrapper .table input[type="checkbox"] { margin-top: 4px !important }
+     .show-business {width: 153px; margin-top:10px;}
+    .show-business .title { font-weight:bold; font-size:13px; color: #333333; padding-bottom: 5px;}
+    .show-business .name { font-size:11px; color: #666666;}
+    .dropdown a.right {border-right: 1px solid #101417;}
+    </style>
+    <script type="text/javascript" src="/static/js/jquery.min.js"></script>
+    <script type="text/javascript" src="/static/js/bootstrap/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/static/js/theme.js"></script>
+
+    <!-- 页面自定义 -->
+    <?php
+        $resources = isset($resources) ? $resources : '';
+        if($sideMenu == 'index' OR $sideMenu == 'click') {
+            echo '<script type="text/javascript" src="/static/js/highcharts/highcharts.js"></script>';
+        }
+        if($sideMenu == 'access') {
+            echo '<script type="text/javascript" src="/static/js/highcharts/highcharts.js"></script>';
+        }
+
+        if ($resources == 'monitor_setting') {
+            echo '<link rel="stylesheet" href="/static/css/compiled/tables.css" type="text/css" media="screen" />';
+        }
+    ?>
+    <script type="text/javascript" src="/static/js/main.js"></script>
+
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" /></head>
+<body>
+
+    <!-- navbar -->
+    <div class="navbar navbar-inverse navbar-fixed-top">
+        <div class="navbar-inner">
+            <button type="button" class="btn btn-navbar visible-phone" id="menu-toggler">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a href="/index" class="brand">
+                <img src="/static/img/logo.png" class="logo">
+            </a>
+            <ul class="nav">
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle right nav-font" data-toggle="dropdown">监控地区</a>
+                    <ul class="dropdown-menu region-list">
+                    </ul>
+                </li>
+            </ul>
+            <div class="pull-right">
+                <div id="showDate" class="show-date"><?php echo $this->nowDate; ?></div>
+                <ul class="nav">
+                    <?php //if($this->loginInfo) { ?>
+                    <!--<li>
+                        <a href="#/personal/info"><?php /*//echo $this->loginInfo['email'] */?></a>
+                    </li>-->
+                    <li class="dropdown">
+                        <a href="/index/setting">设定URL</a>
+                        <!--<a href="#" class="dropdown-toggle right" data-toggle="dropdown">
+                            你的账户
+                            <b class="caret"></b>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a href="#/personal/info">个人信息</a></li>
+                            <li><a href="/index/setting">监控设定</a></li>
+                            <li><a href="/personal/signout">登出账户</a></li>
+                        </ul>-->
+                    </li>
+                    <?php //} else {?>
+                    <!--<li class="settings hidden-phone">
+                        <a href="/personal/signin" role="button" title="登陆账户">登陆账户</a>
+                    </li>-->
+                    <?php //} ?>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <!-- end navbar -->
+
+    <!-- sidebar -->
+    <div id="sidebar-nav">
+        <div class="show-region">
+            <span class="text"></span>
+        </div>
+        <ul id="dashboard-menu">
+            <?php if($sideMenu == 'index') { ?>
+            <li class="active"><div class="pointer"><div class="arrow"></div><div class="arrow_border"></div></div>
+            <?php } else {?>
+            <li>
+            <?php } ?>
+                <a href="/index">
+                    <i class="icon-home"></i>
+                    <span>监控大盘</span>
+                </a>
+            </li>
+
+            <?php if($sideMenu == 'click') { ?>
+            <li class="active"><div class="pointer"><div class="arrow"></div><div class="arrow_border"></div></div>
+            <?php } else {?>
+                <li>
+                    <?php } ?>
+                    <a href="/click/show">
+                        <i class="icon-signal"></i>
+                        <span>点击转换</span>
+                    </a>
+            </li>
+            <?php /* ?>
+            <?php if($sideMenu == 'access') { ?>
+            <li class="active"><div class="pointer"><div class="arrow"></div><div class="arrow_border"></div></div>
+            <?php } else {?>
+            <li>
+            <?php } ?>
+                <a href="/index/access">
+                    <i class="icon-globe"></i>
+                    <span>访问详情</span>
+                </a>
+            </li>
+            <?php */ ?>
+            
+            <?php if($sideMenu == 'alarm') { ?>
+            <li class="active"><div class="pointer"><div class="arrow"></div><div class="arrow_border"></div></div>
+            <?php } else {?>
+            <li>
+            <?php } ?>
+                <!--<a href="/alarm/notify">
+                    <i class="icon-bell-alt"></i>
+                    <span>监控报警</span>
+                </a>-->
+            </li>
+
+            <?php if($sideMenu == 'statisticlist') { ?>
+            <li class="active"><div class="pointer"><div class="arrow"></div><div class="arrow_border"></div></div>
+                <?php } else {?>
+            <li>
+            <?php } ?>
+                <a class="dropdown-toggle" href="javascript:;">
+                    <i class="icon-coffee"></i>
+                    <span>统计列表</span>
+                    <i class="icon-chevron-down"></i>
+                </a>
+                <ul class="submenu" <?php if ($sideMenu == 'statisticlist') echo 'style="display : block"'; ?>>
+                    <!--<li><a href="/Statisticlist/RequestDataSize" <?php /*if ($subMenu == 'requestDataSize') echo 'class="active"';  */?>>访问流量</a></li>
+                    <li><a href="/Statisticlist/ResponseTime" <?php /*if ($subMenu == 'responseTime') echo 'class="active"';  */?>>响应耗时</a></li>-->
+                    <li><a href="/Statisticlist/AccessNumber" <?php if ($subMenu == 'accessNumber') echo 'class="active"';  ?>>访问次数</a></li>
+                </ul>
+            </li>
+
+            <!--<?php if($sideMenu == 'log') { ?>
+            <li class="active"><div class="pointer"><div class="arrow"></div><div class="arrow_border"></div></div>
+            <?php } else {?>
+            <li>
+            <?php } ?>
+                <a href="/log">
+                    <i class="icon-book"></i>
+                    <span>日志查询</span>
+                </a>
+            </li>
+            
+            -->
+            
+            <?php if($sideMenu == 'admin') { ?>
+            <li class="active"><div class="pointer"><div class="arrow"></div><div class="arrow_border"></div></div>
+                <?php } else {?>
+            <li>
+            <?php } ?>
+                <a class="dropdown-toggle" href="javascript:;">
+                    <i class="icon-wrench"></i>
+                    <span>配置管理</span>
+                    <i class="icon-chevron-down"></i>
+                </a>
+                <ul class="submenu" <?php if ($sideMenu == 'admin') echo 'style="display : block"'; ?>>
+                    <li><a href="/alarm/log" <?php if ($subMenu == 'alarm_log') echo 'class="active"';  ?>>日志采集</a></li>
+                    <li><a href="/alarm/worker" <?php if ($subMenu == 'alarm_worker') echo 'class="active"';  ?>>监控对象</a></li>
+                    <li><a href="/alarm/action" <?php if ($subMenu == 'alarm_action') echo 'class="active"';  ?>>监控行为</a></li>
+                    <!--<li><a href="/alarm/monitor" <?php /*if ($subMenu == 'alarm_monitor') echo 'class="active"';  */?>>报警配置</a></li>-->
+                </ul>
+            </li>
+
+            <?php if($sideMenu == 'alert') { ?>
+            <li class="active"><div class="pointer"><div class="arrow"></div><div class="arrow_border"></div></div>
+            <?php } else {?>
+            <li>
+                <?php } ?>
+                <a class="dropdown-toggle" href="javascript:;">
+                    <i class="icon-envelope"></i>
+                    <span>报警订阅</span>
+                    <i class="icon-chevron-down"></i>
+                </a>
+                <ul class="submenu" <?php if ($sideMenu == 'alert') echo 'style="display : block"'; ?>>
+                    <li><a href="/alert/alarm" <?php if ($subMenu == 'alert_alarm') echo 'class="active"';  ?>>我的报警</a></li>
+                    <li><a href="/alert/data" <?php if ($subMenu == 'alert_data') echo 'class="active"';  ?>>基础数据</a></li>
+                    <li><a href="/alert/template" <?php if ($subMenu == 'alert_template') echo 'class="active"';  ?>>模板管理</a></li>
+                    <li><a href="/alert/subscribe" <?php if ($subMenu == 'alert_subscribe') echo 'class="active"';  ?>>订阅管理</a></li>
+                    <li><a href="/alert/users" <?php if ($subMenu == 'alert_users') echo 'class="active"';  ?>>用户管理</a></li>
+                    <li><a href="/alert/groups" <?php if ($subMenu == 'alert_groups') echo 'class="active"';  ?>>组的管理</a></li>
+                </ul>
+            </li>
+            
+            <!--<li>
+                <div class="user-count">
+                    <span class="title"><a href="/online/userlist">在线用户</a></span>
+                    [<span class="count"></span>人]
+                </div>
+            </li>-->
+            <?php
+            if ($businessSetting) {
+                ?>
+                <li>
+                    <div class="show-business">
+                        <span class="title">当前URL</span><br/>
+                        <?php
+                        foreach($businessSetting AS $key => $value) {
+                            echo "<span class='name'>{$value['host']}</span><br/>";
+                        }
+                        ?>
+                    </div>
+                </li>
+            <?php
+            }
+            ?>
+        </ul>
+
+    </div>
+    <!-- end sidebar -->
+
+
+    <!-- main container -->
+    <div class="content">
+        <?php echo $_content; ?>
+    </div>
+    <input type="hidden" value="<?php echo time(); ?>" id="nowTime" />
+    <!--    <script type="text/javascript" src="/static/js/flipclock/flipclock.js"></script>-->
+    <script type="text/javascript" src="/static/js/animatescroll.js"></script>
+    <script type="text/javascript" src="/static/js/noty/packaged/jquery.noty.packaged.min.js"></script>
+    <script type="text/javascript" src="/static/js/modules/user/online.js"></script>
+</body>
+</html>

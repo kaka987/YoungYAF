@@ -1,0 +1,206 @@
+<?php
+$this->title = '响应耗时 - 业务监控系统';
+$this->sideMenu = 'statisticlist';
+$this->subMenu = 'responseTime';
+?>
+<div class="container-fluid">
+    <div id="pad-wrapper" class="users-list">
+        <div class="row-fluid header">
+            <h3>响应耗时</h3>
+            <div class="search span10 pull-right">
+                <div class="form">
+                    <input type="text" id="from_date"  onclick="WdatePicker({dateFmt:'yyyy-M-d',skin:'twoer'})" placeholder="请选择日期"><i class="spacing"></i>
+                    <a class="btn-flat small" id="filter">筛选</a>
+                </div>
+            </div>
+            <div class="search span10 pull-right">
+                <div class="form">
+                    <!--                    <i>从</i><input type="text" id="from_date" onclick="WdatePicker({maxDate:'#F{$dp.$D(\'to_date\')||\'2020-10-01\'}', dateFmt:'yyyy-MM-dd HH:mm:ss',skin:'twoer'})" placeholder="请选择起始时间"><i class="spacing"></i>-->
+                    <!--                    <i>至</i><input type="text" id="to_date"  onclick="WdatePicker({minDate:'#F{$dp.$D(\'from_date\')}', dateFmt:'yyyy-MM-dd HH:mm:ss',skin:'twoer'})" placeholder="请选择结束时间"><i class="spacing"></i>-->
+                    <div class="btn-group">
+                        <input type= 'hidden'class="btn  node_text"  data-value="" />
+                        <!--                        <button class="btn glow dropdown-toggle" data-toggle="dropdown">-->
+                        <!--                            <span class="caret"></span>-->
+                        <!--                        </button>-->
+                        <ul class="dropdown-menu">
+                            <?php
+                            foreach ($collections AS $collection) {
+                                echo '<li><a href="#" data-name="'. $collection .'" class="choose_node">'. $collection .'</a></li>';
+                            }
+                            ?>
+                        </ul>
+                    </div>
+                    <!--                    <a class="btn-flat small" id="filter">筛选</a>-->
+                </div>
+            </div>
+        </div>
+
+        <!-- Users table -->
+        <div class="row-fluid table">
+            <table class="table table-hover">
+                <thead>
+                <tr>
+                    <th class="sortable">
+                        <span class="line"></span>主机
+                    </th>
+                    <th class="sortable">
+                        <span class="line"></span>路径
+                    </th>
+                    <th class="sortable">
+                        <span class="line"></span>MaxRequestTime(最大时间)
+                    </th>
+                    <th class="sortable">
+                        <span class="line"></span>AvgRequestTime(平均时间)
+                    </th>
+                </tr>
+                </thead>
+                <tbody class="list-body">
+                <tr>
+                    <td colspan="11" style="text-align: center;"><img src="/static/images/ajax-loader.gif" /></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div id="pageNav" class="pagination pull-right">
+        </div>
+        <!-- end users table -->
+    </div>
+    <input type="hidden" id="page" value="1" />
+    <input type="hidden" id="page_num" value="" />
+    <input type="hidden" id="from_time" value="" />
+    <input type="hidden" id="to_time" value="" />
+    <script type="text/javascript" src="/static/js/My97DatePicker/WdatePicker.js"></script>
+    <script type="text/javascript">
+        $(function(){
+            $('#pageNav').delegate('.prev_page', 'click', function(){
+                var page = parseInt($('#page').val());
+                var page_num = $('#page_num').val();
+                var prev_page = page - 1;
+//            console.log('page='+page+'--'+'page_num='+page_num+'--'+'prev_page='+prev_page);
+                if(prev_page < 1) {
+                    prev_page = 1;
+                }
+                initList(prev_page);
+            })
+
+            $('#pageNav').delegate('.next_page', 'click', function(){
+                var page = parseInt($('#page').val());
+                var page_num = $('#page_num').val();
+                var next_page = page + 1;
+                if(next_page > page_num) {
+                    next_page = page_num;
+                }
+                initList(next_page);
+            })
+
+            $('#pageNav').delegate('.jump_page', 'click', function(){
+                var page = parseInt($(this).data('page'));
+                console.log(page);
+                initList(page);
+            })
+
+            $('#filter').on('click', function() {
+                var from_time = $('#from_date').val();
+                $('#from_time').val(from_time);
+                initList(1);
+            })
+
+            $('.choose_node').on('click', function() {
+                var name = $(this).data('name');
+                $('.node_text').html(name);
+                $('.node_text').data("value", name);
+            });
+            var initList = function(page) {
+                $('#page').val(page);
+                var node = $('.node_text').data("value");
+                var from = $('#from_time').val();
+                var url = '/api/analytics/accessList?type=times&page='+ page;
+                if(from.length > 0) {
+                    url += '&from='+ from;
+                }
+
+                if(node.length > 0) {
+                    url += '&collection='+ node;
+                }
+
+                var host = decodeURIComponent(getCookie('USER_BUSINESS'));
+
+                if(host.length > 0 && host != "undefined") {
+                    url += '&host=' + host;
+                }
+
+                $.ajax({
+                    url: url,
+                    dataType: 'json',
+                    success: function(result) {
+                        var data  = result.data.data;
+                        var page_num = result.data.count;
+                        if(page_num > 0) {
+                            $('#page_num').val(page_num);
+                            var listBodyStr = '';
+                            var i = 1;
+                            $.each(data, function(i, n) {
+                                if(i == 1) {
+                                    listBodyStr += '<tr class="first">';
+                                } else {
+                                    listBodyStr += '<tr>';
+                                }
+                                listBodyStr += '<td><span title="'+ n.host         +'">'+ n.host                    +'</span></td>';
+                                listBodyStr += '<td><span title="'+ n.path         +'">'+ n.path     +'</span></td>';
+                                listBodyStr += '<td><span title="'+ n.max_response_time +'">'+ n.max_response_time            +'</span></td>';
+                                listBodyStr += '<td><span title="'+ n.avg_response_time        +'">'+ n.avg_response_time                    +'</span></td>';
+                                listBodyStr += '</tr>';
+                                i++;
+                            })
+                            $('.list-body').html(listBodyStr);
+
+                            if(page_num > 0){
+                                var pageStr = '<ul><li><a href="javascript:;" class="prev_page">‹</a>';
+                                pageStr += '<li><a class="jump_page" href="javascript:;"  data-page="1">首页</a></li>';
+
+                                var show_page_num = 10;
+                                var start_num = page;
+
+                                if ((page_num - page) >= 10) {
+                                    show_page_num = page + 11;
+                                } else {
+                                    show_page_num = page_num;
+                                }
+
+                                for(var i = start_num; i <= show_page_num; i++) {
+                                    if(page == i) {
+                                        pageStr += '<li><a class="active jump_page" href="javascript:;"  data-page="'+ i +'">'+ i +'</a></li>';
+                                    } else {
+                                        pageStr += '<li><a class="jump_page" href="javascript:;"  data-page="'+ i +'">'+ i +'</a></li>';
+                                    }
+                                }
+                                pageStr += '<li><a class="jump_page" href="javascript:;"  data-page="'+ page_num +'">尾页</a></li>';
+                                pageStr += '<li><a href="javascript:;" class="next_page">›</a></li></ul>';
+                                $('.pagination').html(pageStr);
+                            } else {
+                                $('.pagination').html("");
+                            }
+
+                        } else {
+                            $('#from_time').val('');
+                            $('#to_time').val('');
+                            $('#from_date').val('');
+                            $('#to_date').val('');
+                            $('#from_date').focus();
+                            var warning = noty({
+                                text        : '没有数据！',
+                                type        : 'warning',
+                                dismissQueue: true,
+                                layout      : 'topCenter'
+                            });
+                            $('.list-body').html('');
+                            setTimeout(function() { warning.close() }, 5000);
+                        }
+                    }
+                })
+            }
+
+            initList(1);
+
+        })
+    </script>

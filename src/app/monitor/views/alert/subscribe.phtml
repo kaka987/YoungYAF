@@ -1,0 +1,221 @@
+<?php
+	$this->title = '报警订阅管理 - 业务监控系统';
+    $this->sideMenu = 'alert';
+	$this->subMenu = 'alert_subscribe';
+?>
+<style>
+<!--
+.table ul.actions li {
+	display: inline;
+	padding: 5px 6px 0px 3px;
+}
+li {
+	line-height: 20px;
+}
+-->
+</style>
+<div class="container-fluid">
+	<div id="pad-wrapper">
+
+        <div class="row-fluid">
+            <div class="span12">
+                <h3>报警订阅管理</h3>
+                <div>
+                <br/>
+                <div class="pull-right" style="margin-bottom: 10px;">
+                	<!-- <div class="ui-select">
+                    	<select>
+                        	<option>业务</option>
+                        	<option>服务</option>
+                        	<option>状态</option>
+                        </select>
+                    </div>
+                    <input type="text" class="search"> -->
+                    <a href="/alarm/group?o=edit" class="btn-flat success new-product">+ 新增用户组</a>
+                </div>
+<!-- Users table -->
+<div class="row-fluid table">
+    <table class="table table-hover table-striped ">
+        <thead>
+        <tr>
+        	<th class="span1 sortable">ID
+            </th>
+            <th class="span2 sortable">组名称
+            </th>
+            <th class="span2 sortable">
+                <span class="line"></span>接收报警
+            </th>
+            <th class="span2 sortable align-right">
+                <span class="line"></span>报警方式
+            </th>
+            <th class="span2 sortable align-right">
+            	<span class="line"></span>设置
+            </th>
+        </tr>
+        </thead>
+        <tbody>
+        <!-- row -->
+        <?php foreach($alarmList['list'] as $k=>$alarm):?>
+        <tr class="first">
+            <td>
+                <a href="/alarm/group?o=edit&id=<?php echo $alarm['id'];?>"><?php echo $alarm['id'];?></a>
+            </td>
+            <td>
+                <?php echo $alarm['groupname'];?>
+            </td>
+            <td >
+            	<?php $status=array('disable','enable');?>
+                <span class="label label-<?php if($alarm['notify_status']) echo 'success';else echo 'danger';?>"><?php echo $status[$alarm['notify_status']];?></span>
+            </td>
+             <td class="align-right">
+                  <?php echo $alarm['notify_method'];?>
+            </td>
+            <td class="align-right">
+            	<ul class="actions">
+                	<li><a href="/alarm/group?o=edit&id=<?php echo $alarm['id'];?>">Edit</a></li>
+                    <li class="last"><a class="alarm_delete" value="<?php echo $alarm['id'];?>" href="javascript:void(0);">Delete</a></li>
+                </ul>
+            </td>
+        </tr>
+        <?php endforeach;?>
+        </tbody>
+    </table>
+</div>
+<div id="pageNav" class="pagination pull-right">
+     <?php echo $alarmList['pageView'];?>
+</div>
+<input type="hidden" id="page" value="<?php echo $alarmList['page'];?>" />
+<input type="hidden" id="page_num" value="<?php echo $alarmList['num'];?>" />
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+<script type="text/javascript">
+    $(function(){
+		//删除
+		$('.alarm_delete').click(function(){
+			if(confirm('确定删除？')) {
+				var id = $(this).attr('value');
+                //console.log(id);
+				$.ajax({
+					url:'/alarm/group',
+				    type:'post',
+				    dataType: 'json',
+				 	data: {gid:id, o:"delete"},
+				 	async: false,
+				 	success: function(data){
+			            alert(data.msg);
+			            location.reload();
+			       	}
+				});
+			}
+		});
+
+        //分页
+        $('#pageNav').delegate('.prev_page', 'click', function(){
+            var page = parseInt($('#page').val());
+            var page_num = $('#page_num').val();
+            var prev_page = page - 1;
+            if(prev_page < 1) {
+                prev_page = 1;
+            }
+            initList(prev_page);
+        })
+
+        $('#pageNav').delegate('.next_page', 'click', function(){
+            var page = parseInt($('#page').val());
+            var page_num = $('#page_num').val();
+            var next_page = page + 1;
+            if(next_page > page_num) {
+                next_page = page_num;
+            }
+            initList(next_page);
+        })
+
+        $('#pageNav').delegate('.jump_page', 'click', function(){
+            var page = parseInt($(this).data('page'));
+            initList(page);
+        })
+        
+        var initList = function(page) {
+            $('#page').val(page);
+            var url = '/alarm/?page='+ page;
+            $.ajax({
+                url: url,
+                dataType: 'json',
+                success: function(data) {
+                    if(data.result == 1) {
+                        var page_num = data.page_num;
+                        $('#page_num').val(page_num);
+                        var listBodyStr = '';
+                        var i = 1;
+                        $.each(data.data, function(i, n) {
+                            if(i == 1) {
+                                listBodyStr += '<tr class="first">';
+                            } else {
+                                listBodyStr += '<tr>';
+                            }
+                            listBodyStr += '<td><span title="'+ n.agent        +'">'+ n.agent.substr(0, 20)        +'</span></td>';
+                            listBodyStr += '<td><span title="'+ n.code         +'">'+ n.code                       +'</span></td>';
+                            listBodyStr += '<td><span title="'+ n.forward      +'">'+ n.forward.substr(0, 20)      +'</span></td>';
+                            listBodyStr += '<td><span title="'+ n.host         +'">'+ n.host                       +'</span></td>';
+                            listBodyStr += '<td><span title="'+ n.method       +'">'+ n.method                     +'</span></td>';
+                            listBodyStr += '<td><span title="'+ n.path         +'">'+ n.path.substr(0, 20)         +'</span></td>';
+                            listBodyStr += '<td><span title="'+ n.referer      +'">'+ n.referer.substr(0, 20)      +'</span></td>';
+                            listBodyStr += '<td><span title="'+ n.remote       +'">'+ n.remote                     +'</span></td>';
+                            listBodyStr += '<td><span title="'+ n.request_time +'">'+ n.request_time               +'</span></td>';
+                            listBodyStr += '<td><span title="'+ n.size         +'">'+ n.size                       +'</span></td>';
+                            listBodyStr += '<td><span title="'+ n.time.sec     +'">'+ n.time.sec                   +'</span></td>';
+                            listBodyStr += '</tr>';
+                            i++;
+                        })
+                        $('.list-body').html(listBodyStr);
+
+                        var pageStr = '<ul><li><a href="javascript:;" class="prev_page">‹</a></li>';
+                        var show_page_num = page_num - page;
+                        if(show_page_num > 10) {
+                            show_page_num = 10;
+                        }
+                        for(var i = 10; i > 1; i--) {
+                            if(show_page_num > i) {
+                                show_page_num = i + page;
+                                break;
+                            }
+                        }
+
+                        for(var i = page; i <= show_page_num; i++) {
+                            if(page == i) {
+                                pageStr += '<li><a class="active jump_page" href="javascript:;"  data-page="'+ i +'">'+ i +'</a></li>';
+                            } else {
+                                pageStr += '<li><a class="jump_page" href="javascript:;"  data-page="'+ i +'">'+ i +'</a></li>';
+                            }
+                        }
+                        pageStr += '<li><a class="jump_page" href="javascript:;" data-page="'+ page_num +'">'+ page_num +'</a></li>';
+
+                        pageStr += '<li><a href="javascript:;" class="next_page">›</a></li></ul>';
+                        $('.pagination').html(pageStr);
+                    } else {
+                        $('#from_time').val('');
+                        $('#to_time').val('');
+                        $('#from_date').val('');
+                        $('#to_date').val('');
+                        $('#from_date').focus();
+                        var warning = noty({
+                            text        : '起始时间至结束时间间隔不能超过1小时！',
+                            type        : 'warning',
+                            dismissQueue: true,
+                            layout      : 'topCenter'
+                        });
+                        setTimeout(function() { warning.close() }, 5000);
+                    }
+                }
+            })
+        }
+        //initList(1);
+    })
+</script>

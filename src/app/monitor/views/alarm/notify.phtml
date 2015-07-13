@@ -1,0 +1,319 @@
+<?php
+	$this->title = '监控报警 - 业务监控系统';
+    $this->sideMenu = 'alarm';
+?>
+<style>
+<!--
+.table ul.actions li {
+	display: inline;
+	padding: 5px 6px 0px 3px;
+}
+li {
+	line-height: 20px;
+}
+.popover {
+    max-width: 800px;
+}
+-->
+</style>
+<div class="container-fluid">
+	<div id="pad-wrapper">
+
+        <div class="row-fluid">
+            <div class="span12">
+                <h3>监控报警</h3>
+                <div>
+                <br/>
+                <div class="pull-left" style="margin-bottom: 10px;">
+                	<div class="ui-select">
+                    	<select id="select_level">
+                    		<option value='a'>状态-All</option>
+                        	<option value='o'>OK</option>
+                        	<option value='w'>Warning</option>
+                        	<option value='c'>Critical</option>
+                        </select>
+                    </div>
+                    <!-- <input type="text" class="search"> -->
+                    <!--<a href="/alarm/edit" class="btn-flat success new-product">+ 新增服务</a>
+                --></div>
+<!-- Users table -->
+<div class="row-fluid table">
+    <table class="table table-hover table-striped ">
+        <thead>
+        <tr>
+        	<th class="span1 sortable">ID
+            </th>
+            <th class="span2 sortable">服务
+            </th>
+            <th class="span1 sortable">
+                <span class="line"></span>报警
+            </th>
+            <th class="span1 sortable">
+                <span class="line"></span>上次检测
+            </th>
+            <th class="span1 sortable">
+                <span class="line"></span>下次检测
+            </th>
+            <th class="span1 sortable">
+                <span class="line"></span>下次报警
+            </th>
+            <th class="span1 sortable">
+                <span class="line"></span>状态
+            </th>
+            <th class="span2 sortable">
+                <span class="line"></span>持续
+            </th>
+            <th class="span4 sortable align-left">
+                <span class="line"></span>状态详情
+            </th>
+        </tr>
+        </thead>
+        <tbody class="list-body">
+        <!-- row -->
+        
+        </tbody>
+    </table>
+</div>
+<div id="pageNav" class="pagination pull-right">
+</div>
+<input type="hidden" id="page" value="1" />
+<input type="hidden" id="page_num" value="1" />
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+<script type="text/javascript">
+
+$(function(){
+
+
+	var getList = function(page) {
+		$('#page').val(page);
+		var level = $("#select_level").val();
+		var url = '/alarm/list?q=list&page='+ page +'&level='+level;
+		var wait = '<tr><td colspan="11" style="text-align: center;"><img src="/static/images/ajax-loader.gif"></td></tr>';
+        $.ajax({
+            url: url,
+            dataType: 'json',
+            before:function() {
+           	 	$('.list-body').html(wait);
+            },
+            success: function(data) {
+				var alarmData = data.data;
+				var page_num = data.page_num;
+                $('#page_num').val(page_num);
+
+				var listBodyStr = '';
+                var i = 1;
+                $.each(alarmData, function(i, n) {
+                    if(i == 1) {
+                        listBodyStr += '<tr class="first">';
+                    } else {
+                        listBodyStr += '<tr>';
+                    }
+                    var statusLabel = 'success';
+                    switch (n.status) {
+                    	case 'ok': statusLabel = 'success';break;
+                    	case 'warning': statusLabel = 'warning';break;
+                    	case 'critical': statusLabel = 'important';break;
+                    	case 'unkown': statusLabel = 'info';break;
+                    }
+
+                    var notifystatusLabel = 'success';
+                    switch (n.notify_status) {
+                    	case 'enable' : notifystatusLabel = 'success';break;
+                    	case 'disable': notifystatusLabel = 'important';break;
+                    }
+                    listBodyStr += '<td><a href="/alarm/edit?id='+n.service_id+'">'+n.service_id+'</a></td>';
+                    listBodyStr += '<td><a href="/alarm/edit?id='+n.service_id+'">'+n.service_name+'</a></td>';
+                    listBodyStr += '<td><span class="label label-'+notifystatusLabel+'">'+n.notify_status+'</span></td>';
+                    listBodyStr += '<td>'+n.lastTime+'</td>';
+                    listBodyStr += '<td>'+n.nextTime+'</td>';
+                    listBodyStr += '<td>'+n.last_notify_time+'</td>';
+                    listBodyStr += '<td><span class="label label-'+statusLabel+'">'+n.status+'</span></td>';
+                    listBodyStr += '<td>'+n.time+'</td>';
+                    listBodyStr += '<td class="align-left"><div class="logtip" data-toggle="popover" data-placement="bottom" data-id="'+n.service_id+'" title="" data-original-title="Log"><span class="line"></span>'+n.status_detail+'</div></td>';
+                    i++;
+                })
+                $('.list-body').html(listBodyStr);
+
+				// page show 
+                var pageStr = '<ul><li><a href="javascript:;" class="prev_page">‹</a></li>';
+                var show_page_num = page_num - page;
+                if(show_page_num > 10) {
+                    show_page_num = 10;
+                }
+                for(var i = 10; i > 1; i--) {
+                    if(show_page_num > i) {
+                        show_page_num = i + page;
+                        break;
+                    }
+                }
+
+                for(var i = page; i <= show_page_num; i++) {
+                    if(page == i) {
+                        pageStr += '<li><a class="active jump_page" href="javascript:;"  data-page="'+ i +'">'+ i +'</a></li>';
+                    } else {
+                        pageStr += '<li><a class="jump_page" href="javascript:;"  data-page="'+ i +'">'+ i +'</a></li>';
+                    }
+                }
+                pageStr += '<li><a class="jump_page" href="javascript:;" data-page="'+ page_num +'">'+ page_num +'</a></li>';
+
+                pageStr += '<li><a href="javascript:;" class="next_page">›</a></li></ul>';
+                $('.pagination').html(pageStr);
+            }
+		});
+	};
+
+	getList(1);
+	setInterval(function() { getList(1) }, 1000*60);
+
+	$("#select_level").change(function(){getList(1);});
+
+    $('table').delegate('.logtip', 'click', function() {
+        var obj = $(this);
+        var id = $(this).data('id');
+        $.ajax({
+            url: '/alarm/list?q=getlog&id=' + id,
+            success: function(result) {
+                $(obj).popover({
+                    html: true,
+                    content: result,
+                    placement: 'bottom'
+                });
+//                $(obj).popover('show');
+            }
+        });
+    });
+
+	//删除
+	$('.alarm_delete').click(function(){
+			if(confirm('确定删除？')) {
+				var id = $(this).attr('value');
+				$.ajax({
+					url:'/alarm/save',
+				    type:'post',
+				    dataType: 'json',
+				 	data: {monitor_id:id, foo:"bar"},
+				 	async: false,
+				 	success: function(data){
+			            alert(data.msg);
+			            location.reload();
+			       	}
+				});
+			}
+		});
+
+        //分页
+        $('#pageNav').delegate('.prev_page', 'click', function(){
+            var page = parseInt($('#page').val());
+            var page_num = $('#page_num').val();
+            var prev_page = page - 1;
+            if(prev_page < 1) {
+                prev_page = 1;
+            }
+            getList(prev_page);
+        })
+
+        $('#pageNav').delegate('.next_page', 'click', function(){
+            var page = parseInt($('#page').val());
+            var page_num = $('#page_num').val();
+            var next_page = page + 1;
+            if(next_page > page_num) {
+                next_page = page_num;
+            }
+            getList(next_page);
+        })
+
+        $('#pageNav').delegate('.jump_page', 'click', function(){
+            var page = parseInt($(this).data('page'));
+            getList(page);
+        })
+        
+        var initList = function(page) {
+            $('#page').val(page);
+            var url = '/alarm/?page='+ page;
+            $.ajax({
+                url: url,
+                dataType: 'json',
+                success: function(data) {
+                    if(data.result == 1) {
+                        var page_num = data.page_num;
+                        $('#page_num').val(page_num);
+                        var listBodyStr = '';
+                        var i = 1;
+                        $.each(data.data, function(i, n) {
+                            if(i == 1) {
+                                listBodyStr += '<tr class="first">';
+                            } else {
+                                listBodyStr += '<tr>';
+                            }
+                            listBodyStr += '<td><span title="'+ n.agent        +'">'+ n.agent.substr(0, 20)        +'</span></td>';
+                            listBodyStr += '<td><span title="'+ n.code         +'">'+ n.code                       +'</span></td>';
+                            listBodyStr += '<td><span title="'+ n.forward      +'">'+ n.forward.substr(0, 20)      +'</span></td>';
+                            listBodyStr += '<td><span title="'+ n.host         +'">'+ n.host                       +'</span></td>';
+                            listBodyStr += '<td><span title="'+ n.method       +'">'+ n.method                     +'</span></td>';
+                            listBodyStr += '<td><span title="'+ n.path         +'">'+ n.path.substr(0, 20)         +'</span></td>';
+                            listBodyStr += '<td><span title="'+ n.referer      +'">'+ n.referer.substr(0, 20)      +'</span></td>';
+                            listBodyStr += '<td><span title="'+ n.remote       +'">'+ n.remote                     +'</span></td>';
+                            listBodyStr += '<td><span title="'+ n.request_time +'">'+ n.request_time               +'</span></td>';
+                            listBodyStr += '<td><span title="'+ n.size         +'">'+ n.size                       +'</span></td>';
+                            listBodyStr += '<td><span title="'+ n.time.sec     +'">'+ n.time.sec                   +'</span></td>';
+                            listBodyStr += '</tr>';
+                            i++;
+                        })
+                        $('.list-body').html(listBodyStr);
+
+                        var pageStr = '<ul><li><a href="javascript:;" class="prev_page">‹</a></li>';
+                        var show_page_num = page_num - page;
+                        if(show_page_num > 10) {
+                            show_page_num = 10;
+                        }
+                        for(var i = 10; i > 1; i--) {
+                            if(show_page_num > i) {
+                                show_page_num = i + page;
+                                break;
+                            }
+                        }
+
+                        for(var i = page; i <= show_page_num; i++) {
+                            if(page == i) {
+                                pageStr += '<li><a class="active jump_page" href="javascript:;"  data-page="'+ i +'">'+ i +'</a></li>';
+                            } else {
+                                pageStr += '<li><a class="jump_page" href="javascript:;"  data-page="'+ i +'">'+ i +'</a></li>';
+                            }
+                        }
+                        pageStr += '<li><a class="jump_page" href="javascript:;" data-page="'+ page_num +'">'+ page_num +'</a></li>';
+
+                        pageStr += '<li><a href="javascript:;" class="next_page">›</a></li></ul>';
+                        $('.pagination').html(pageStr);
+                    } else {
+                        $('#from_time').val('');
+                        $('#to_time').val('');
+                        $('#from_date').val('');
+                        $('#to_date').val('');
+                        $('#from_date').focus();
+                        var warning = noty({
+                            text        : '起始时间至结束时间间隔不能超过1小时！',
+                            type        : 'warning',
+                            dismissQueue: true,
+                            layout      : 'topCenter'
+                        });
+                        setTimeout(function() { warning.close() }, 5000);
+                    }
+                }
+            })
+        }
+        //initList(1);
+    });
+
+function getPage() {
+	
+	
+}
+</script>

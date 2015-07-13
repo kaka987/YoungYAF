@@ -1,0 +1,266 @@
+<?php
+	$this->title = '监控配置 - 业务监控系统';
+	$this->sideMenu = 'admin';
+	$this->subMenu = 'alarm_monitor';
+?>
+
+<style type="text/css">
+label{
+	display: inline-block;
+	float: left;
+	font-weight: 600;
+	cursor: auto;
+	font-size: 12px;
+	width: 150px;
+	text-align: left;
+}
+
+.field-box {
+	margin-bottom: 30px;
+	margin-left: 0;
+	float: left;
+	width: 100%;
+}
+#config-back {
+	margin-left:10px;
+}
+
+a {
+	cursor:pointer;
+}
+
+</style>
+<link href="/static/css/lib/select2.css" type="text/css" rel="stylesheet" />
+<div class="container-fluid">
+            <div id="pad-wrapper" class="form-page">
+            	<h3>监控配置-<?php if(isset($D['id'])) echo '编辑';else echo '新增';?></h3>
+            	<hr/>
+                <div class="row-fluid form-wrapper">
+                    <!-- left column -->
+                    <div class="span10 column">
+                        <form id="monitor-config-form" class="form-horizontal" role="form" onsubmit="return SubmitForm(this);" />
+                            <input type="hidden" id="id" value="<?php echo isset($D['id'])?$D['id']:'';?>" />
+                            <input type="hidden" id="rlaid" value="<?php echo isset($D['rlaid'])?$D['rlaid']:'';?>" />
+                            <div class="field-box">
+                                <label>插件名称:</label>
+                                <input id="name" class="span5 inline-input" value="<?php echo (isset($D['name']) AND $D['name']) ? $D['name']:'';?>" data-toggle="tooltip" data-trigger="focus" title="插件名称" data-placement="right" type="text" />
+                            </div>
+
+                            <div class="field-box">
+                                <label>监控状态:</label>
+                                <div class="ui-select">
+                                    <select id="status">
+                                        <?php $status = array('disable','enable');?>
+                                        <?php foreach($status as $k=>$s):?>
+                                            <option value="<?php echo $k;?>"
+                                                <?php if(isset($D['status']) AND $k == $D['status']) echo "selected='1'";?>" />
+                                                <?php echo $s;?>
+                                            <?php endforeach;?>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="field-box">
+                                <label>监控业务:</label>
+                                <select style="width:250px" multiple="" id="logs" class="select2">
+                                    <option />
+                                    <?php if($D['logs']):?>
+                                        <?php  if(isset($D['apps'])) $apps = explode(',',$D['apps']);?>
+                                        <?php foreach($D['logs'] as $app):?>
+                                            <option value="<?php echo $app['logid']?>"
+                                            <?php if(isset($D['selected']['logid']) AND ($app['logid']==$D['selected']['logid'])) echo 'selected="1"';?>
+                                            /><?php echo $app['logid']."-".$app['service']?>
+                                        <?php endforeach;?>
+                                    <?php endif;?>
+                                </select>
+                            </div>
+
+                            <div class="field-box">
+                                <label>计算插件:</label>
+                                <div class="ui-select">
+                                    <select id="workers">
+                                        <?php $workers = (isset($D['worker']) AND $D['worker']) ? $D['worker'] : array();?>
+                                        <?php foreach($workers as $k=>$s):?>
+                                            <option value="<?php echo $s['id'];?>"
+                                                    <?php if(isset($D['selected']['workerid']) AND ($s['id'] == $D['selected']['workerid'])) echo "selected='1'";?>" />
+                                                    <?php echo $s['name'];?>
+                                                <?php endforeach;?>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="field-box">
+                                <label>监控行为:</label>
+                                <div class="ui-select">
+                                    <select id="actions">
+                                        <?php $actions = (isset($D['actions']) AND $D['actions']) ? $D['actions'] : array();?>
+                                        <?php foreach($actions as $k=>$s):?>
+                                            <option value="<?php echo $s['id'];?>"
+                                                        <?php if(isset($D['selected']['actionid']) AND ($s['id'] == $D['selected']['actionid'])) echo "selected='1'";?>" />
+                                                        <?php echo $s['name'];?>
+                                                    <?php endforeach;?>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="field-box">
+                                <label>WARNING:</label>
+                                <input id="warning" class="span5 inline-input"
+                                       value="<?php echo (isset($D['warning']) AND $D['warning']) ? $D['warning']:'';?>"
+                                       data-toggle="tooltip" data-trigger="focus"
+                                       title="warning" data-placement="right" type="text" />
+                            </div>
+
+                            <div class="field-box">
+                                <label>CRITICAL:</label>
+                                <input id="critical" class="span5 inline-input"
+                                       value="<?php echo (isset($D['critical']) AND $D['critical']) ? $D['critical']:'';?>"
+                                       data-toggle="tooltip" data-trigger="focus"
+                                       title="critical" data-placement="right" type="text" />
+                            </div>
+
+                            <div class="field-box">
+                                <label>插件参数:</label>
+                                <input id="argvs" class="span5 inline-input"
+                                       value="<?php echo (isset($D['argvs']) AND $D['argvs']) ? $D['argvs']:'';?>"
+                                       data-toggle="tooltip" data-trigger="focus"
+                                       title="插件参数" data-placement="right" type="text" />
+                            </div>
+
+                            <div class="field-box">
+                                <label>KEY1:</label>
+                                <input id="key1" class="span5 inline-input"
+                                       value="<?php echo (isset($D['key1']) AND $D['key1']) ? $D['key1']:'';?>"
+                                       data-toggle="tooltip" data-trigger="focus"
+                                       title="插件KEY1" data-placement="right" type="text" />
+                            </div>
+
+                            <div class="field-box">
+                                <label>KEY2:</label>
+                                <input id="key2" class="span5 inline-input"
+                                       value="<?php echo (isset($D['key2']) AND $D['key2']) ? $D['key2']:'';?>"
+                                       data-toggle="tooltip" data-trigger="focus"
+                                       title="插件KEY2" data-placement="right" type="text" />
+                            </div>
+
+                            <div class="field-box">
+                                <label>KEY3:</label>
+                                <input id="key3" class="span5 inline-input"
+                                       value="<?php echo (isset($D['key3']) AND $D['key3']) ? $D['key3']:'';?>"
+                                       data-toggle="tooltip" data-trigger="focus"
+                                       title="插件KEY3" data-placement="right" type="text" />
+                            </div>
+
+                            <!--<div class="field-box">
+                                <label>KEY4:</label>
+                                <input id="key4" class="span5 inline-input"
+                                       value="<?php /*echo (isset($D['key4']) AND $D['key4']) ? $D['key4']:'';*/?>"
+                                       data-toggle="tooltip" data-trigger="focus"
+                                       title="插件KEY4" data-placement="right" type="text" />
+                            </div>
+
+
+                            <div class="field-box">
+                                <label>KEY5:</label>
+                                <input id="key5" class="span5 inline-input"
+                                       value="<?php /*echo (isset($D['key5']) AND $D['key5']) ? $D['key5']:'';*/?>"
+                                       data-toggle="tooltip" data-trigger="focus"
+                                       title="插件KEY5" data-placement="right" type="text" />
+                            </div>-->
+
+                            <div class="field-box">
+                                <label>备注说明:</label>
+                                <textarea id="desc" class="span8" rows="4"><?php echo (isset($D['desc']) AND $D['desc'])?$D['desc']:'';?></textarea>
+                            </div>
+                            
+                            <button id="config-submit" type="button" class="btn btn-default btn-primary">提交</button>
+                            <a id="config-back" href="/alarm/monitor">返回</a>
+                        	<div id="tip_submit" class="alert alert-success" style="visibility:hidden;margin-top:10px;font-size:18px;"></div>
+                        </form>
+                        
+                    </div>
+					<!-- end form -->
+                </div>
+            </div>
+        </div>
+        
+<div id="suc" title="" style="visibility:hidden;text-align:center;">
+	<h3>提交成功！</h3>
+	<span></span>
+</div>
+<script src="/static/js/select2.min.js"></script>
+<script type="text/javascript">
+$(function () {
+	
+	$("#config-submit").click(function(){
+		SubmitForm();
+	});
+
+    $(".select2").select2({
+        placeholder: "Select logs config"
+    });
+
+	$("#monitor_test").click(function(){
+		$.ajax({
+			url:testurl,
+		    type:'get',
+		    dataType: 'json',
+		 	data: testparam,
+		 	async: false,
+		 	success: function(data){
+			 	if(data.flag == 'success') {
+			 		$("#monitor_result").html(JSON.stringify(data.data));
+				} else if(data.flag == 'error') {
+					$("#monitor_result").html(JSON.stringify(data.msg));
+				} else {
+					$("#monitor_result").html('Unknow error!');
+				}
+	       	}
+		});
+	});
+	
+});
+
+function SubmitForm(obj) {
+    if (!$("#key1").val() || !$("#key2").val()) { alert('请填写key'); return FALSE;}
+	var configData = {
+        id				: $("#id").val(),
+        rlaid		    : $("#rlaid").val(),
+        name		    : $("#name").val(),
+        status			: $("#status").val(),
+        logs			: $("#logs").val(),
+        workers			: $("#workers").val(),
+        actions			: $("#actions").val(),
+        warning			: $("#warning").val(),
+        critical		: $("#critical").val(),
+        argvs		    : $("#argvs").val(),
+        key1		    : $("#key1").val(),
+        key2		    : $("#key2").val(),
+        key3		    : $("#key3").val(),
+        //key4		    : $("#key4").val(),
+        //key5		    : $("#key5").val(),
+        desc		    : $("#desc").val()
+			};
+	console.log(configData);
+	//提交数据
+	$.ajax({
+		url:'/alarm/monitor?o=add',
+	    type:'post',
+	    dataType: 'json',
+	 	data: configData,
+	 	async: false,
+	 	success: function(data){
+            //console.log(data.flag);
+            $("#tip_submit").css('visibility','visible').attr('class','alert alert-'+data.flag).html(data.msg);
+       	}
+	});
+}
+
+function jqchk(name){  //jquery获取复选框值    
+	  var chk_value =[];    
+	  $('input[name="'+name+'"]:checked').each(function(){    
+		  chk_value.push($(this).val());    
+	  });    
+	  return chk_value.length==0 ? '' : chk_value;   
+}    
+</script>

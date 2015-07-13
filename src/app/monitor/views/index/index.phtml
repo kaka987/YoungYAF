@@ -1,0 +1,112 @@
+<?php
+    $this->title = '监控大盘 - 业务监控系统';
+    $this->sideMenu = 'index';
+    $this->date = $this->date ? $this->date : date('Y-m-d');
+?>
+<!--<div class="skins-nav">
+    <a href="javascript:;" class="skin second_nav" onclick="javascript:$('#per_minute_requests').animatescroll();">
+        <span class="text">每分钟请求次数</span>
+    </a>
+    <a href="javascript:;" class="skin second_nav" onclick="javascript:$('#per_second_requests').animatescroll();">
+        <span class="text">每秒请求次数</span>
+    </a>
+    <a href="javascript:;" class="skin second_nav" onclick="javascript:$('#per_minute_errors').animatescroll();">
+        <span class="text">每分钟错误次数</span>
+    </a>
+    <a href="javascript:;" class="skin second_nav" onclick="javascript:$('#one_minute_all_nodes_requests').animatescroll();">
+        <span class="text">1分钟内所有节点请求次数</span>
+    </a>
+</div>-->
+<div id="monitor_history">
+    <div class="form">
+        <div class="title_section">
+            监控时间：<span class="bold"><?php echo $this->date ?></span>
+        </div>
+        <div class="first_section left">
+            <i>日期</i><div id="first_date"></div>
+        </div>
+        <div class="from_section left" style="display: none">
+            <i>开始</i><span id="from_date"></span>
+        </div>
+        <div class="to_section left"  style="display: none">
+            <i>结束</i><span id="to_date"></span>
+        </div>
+        <div class="choose_section left">
+            <p><input type="radio" name="type" value="day" checked="checked" />按日</p>
+            <p><input type="radio" name="type" value="between" />时间段</p>
+            <p><button id="applyBetween" type="button" class="btn btn-primary btn-mini" style="display: none">应用时间段</button></p>
+        </div>
+    </div>
+</div>
+<div class="container-fluid">
+
+    <div id="main-stats">
+        <div class="row-fluid stats-row">
+            <div class="span3 stat">
+                <div class="data">
+                    <span class="number pv">...</span>
+                    PV
+                </div>
+            </div>
+            <div class="span3 stat">
+                <div class="data">
+                    <span class="number error">...</span>
+                    ERROR
+                </div>
+            </div>
+            <!--<div class="span3 stat">
+                <div class="data">
+                    <span class="number warning">...</span>
+                    WARNING
+                </div>
+            </div>
+            <div class="span3 stat last">
+                <div class="data">
+                    <span class="number critical">...</span>
+                    CRITICAL
+                </div>
+            </div>-->
+        </div>
+    </div>
+
+    <div id="pad-wrapper">
+        <i id="per_minute_requests"></i>
+        <i id="per_second_requests"></i>
+        <div class="monitor-history form">
+            <div class="monitor-time">监控时间：<span class="bold"><?php echo $this->date ?></span><i class="icon-calendar pointer"></i></div>
+        </div>
+
+        <div class="row-fluid chart">
+            <div class="span6">
+                <h4 class="title">Per minute requests（每分钟请求次数）</h4>
+                <div class="report" id="accessTrend"><div class="report-loader"><img src="/static/images/ajax-loader.gif" /></div></div>
+            </div>
+            <div class="span6">
+                <h4 class="title">Per second requests（每秒请求次数）</h4>
+                <div class="report" id="accessDynamic"><div class="report-loader"><img src="/static/images/ajax-loader.gif" /></div></div>
+            </div>
+        </div>
+
+        <i id="per_minute_errors"></i>
+        <i id="one_minute_all_nodes_requests"></i>
+
+        <div class="row-fluid section">
+            <div class="span6">
+                <h4 class="title">Per minute errors（每分钟错误次数）</h4>
+                <div class="report" id="errorTrend"><div class="report-loader"><img src="/static/images/ajax-loader.gif" /></div></div>
+            </div>
+            <div class="span6">
+                <h4 class="title">One minute all nodes requests（1分钟内所有节点请求次数）</h4>
+                <div class="report" id="numberOfNode"><div class="report-loader"><img src="/static/images/ajax-loader.gif" /></div></div>
+            </div>
+        </div>
+    </div>
+</div>
+<input type="hidden" value="hide" id="history_status"/>
+<input type="hidden" value="<?php echo $this->period ?>" id="history_period"/>
+<input type="hidden" value="<?php echo $this->date ?>" id="history_date"/>
+<input type="hidden" value="ON" id="scrollSwitch"/>
+<!-- scripts -->
+<script type="text/javascript" src="/static/js/jquery.scrollUp.min.js"></script>
+<script type="text/javascript" src="/static/js/My97DatePicker/WdatePicker.js"></script>
+<script type="text/javascript" src="/static/js/index.js?t=<?php echo time() ?>"></script>

@@ -1,0 +1,314 @@
+<?php
+	$this->title = '监控报警 - 业务监控系统';
+    $this->sideMenu = 'alarm_log';
+?>
+
+<style type="text/css">
+label{
+	display: inline-block;
+	float: left;
+	font-weight: 600;
+	cursor: auto;
+	font-size: 12px;
+	width: 140px;
+	text-align: left;
+}
+
+.field-box {
+	margin-bottom: 30px;
+	margin-left: 0;
+	float: left;
+	width: 100%;
+}
+
+#config-back {
+    margin-left:10px;
+}
+
+a,.icon-plus,.icon-minus {
+    cursor:pointer;
+}
+
+.select1,.select2 {
+    height: 25px;
+    margin-right: 10px;
+}
+
+.select2 {
+    width: 200px;
+}
+
+.monitored{
+    margin-bottom: 5px;
+}
+
+</style>
+<link href="/static/css/lib/select2.css" type="text/css" rel="stylesheet" />
+<div class="container-fluid">
+            <div id="pad-wrapper" class="form-page">
+            	<h3>日志采集配置-<?php if(isset($L['id'])) echo '编辑';else echo '新增';?></h3>
+            	<hr/>
+                <div class="row-fluid form-wrapper">
+                    <!-- left column -->
+                    <div class="span8 column">
+                        <form id="monitor-config-form" class="form-horizontal" role="form" onsubmit="return SubmitForm(this);" />
+                            <input type="hidden" id="monitor_id" value="<?php echo isset($L['logid'])?$L['logid']:'';?>" />
+                            <h4>日志采集配置</h4><hr/>
+
+                            <div class="field-box">
+                                <label>监控服务:</label>
+                                <input id="monitor_service" class="span8 inline-input"
+                                   value="<?php echo (isset($L['service']) AND $L['service'])?$L['service']:'';?>"
+                                   data-toggle="tooltip" data-trigger="focus" title="填写监控服务名称"
+                                   data-placement="right" type="text" />
+                            </div>
+
+                            <div class="field-box">
+                                <label>业务名称:</label>
+                                <input id="monitor_app" class="span8 inline-input" 
+                                value="<?php echo (isset($L['app']) AND $L['app'])?$L['app']:'';?>"
+                                data-toggle="tooltip" data-trigger="focus" title="填写业务名称" 
+                                data-placement="right" type="text" />
+                            </div>
+                            
+                            <div class="field-box">
+                                <label>主机名:</label>
+                                <input id="monitor_hostname" class="span8 inline-input" 
+                                value="<?php echo (isset($L['hostname']) AND $L['hostname'])?$L['hostname']:'';?>"
+                                data-toggle="tooltip" data-trigger="focus" title="填写日志所在服务器名称" 
+                                data-placement="right" type="text" />
+                            </div>
+                            
+                            <div class="field-box">
+                                <label>IP地址:</label>
+                                <input id="monitor_hostip" class="span8 inline-input"
+                                value="<?php echo (isset($L['hostip']) AND $L['hostip'])? long2ip($L['hostip']):'';?>"
+                                data-toggle="tooltip" data-trigger="focus" title="填写主机对应IP" 
+                                data-placement="right" type="text" />
+                            </div>
+
+                            <div class="field-box">
+                                <label>日志路径:</label>
+                                <input id="monitor_logpath" class="span8 inline-input"
+                                       value="<?php echo (isset($L['logpath']) AND $L['logpath'])?$L['logpath']:'';?>"
+                                       data-toggle="tooltip" data-trigger="focus" title="填写日志路径名称"
+                                       data-placement="right" type="text" />
+                            </div>
+
+                            <div class="field-box">
+                                <label>所在地区:</label>
+                                <div class="ui-select">
+                                    <select id="monitor_region" >
+                                        <?php $status = array(2=>'新加坡-SIN',1=>'美东-IAD',3=>'美西-NCA',11=>'伦敦-LON',5=>'南美-SP');?>
+                                        <?php foreach($status as $k=>$s):?>
+                                            <option value="<?php echo $k;?>"
+                                                <?php if(isset($L['region']) AND $k == $L['region']) echo "selected='1'";?>" />
+                                                <?php echo $s;?>
+                                            <?php endforeach;?>
+                                    </select>
+                                </div>
+                            </div>
+
+
+                            <div class="field-box" id="tt">
+                                <?php if(isset($L['selectedWorkerAction'])):?>
+                                <?php foreach($L['selectedWorkerAction'] as $k=>$v):?>
+                                <?php if($k==0):?>
+                                            <label>监控配置:</label>
+                                <?php else:?>
+                                            <label></label>
+                                <?php endif;?>
+                                <div id="monitor_add" class="monitored">
+                                    <select class="select1" type="monitor_worker">
+                                        <option value="0"/>选择计算插件
+                                        <?php $worker = isset($L['worker'])?$L['worker']:array();?>
+                                        <?php foreach($worker as $s):?>
+                                            <option value="<?php echo $s['id'];?>"
+                                                    <?php if(isset($v['workerid']) AND $s['id'] == $v['workerid']) echo "selected='1'";?>" />
+                                                    <?php echo $s['id'].'-'.$s['name'];?>
+                                        <?php endforeach;?>
+                                    </select>
+
+                                    <select class="select1" type="monitor_action">
+                                        <option value="0"/>选择监控行为
+                                        <?php $actions = isset($L['actions'])?$L['actions']:array();?>
+                                        <?php foreach($actions as $s):?>
+                                            <option value="<?php echo $s['id'];?>"
+                                                <?php if(isset($v['actionid']) AND $s['id'] == $v['actionid']) echo "selected='1'";?>" />
+                                                <?php echo $s['id'].'-'.$s['name'];?>
+                                        <?php endforeach;?>
+                                    </select>
+
+                                    <span class="icon-plus"></span>
+                                    <span style="margin-left:10px;<?php if($k==0):?>display: none;<?php endif;?>" class="icon-minus"></span>
+                                </div>
+                                <?php endforeach;?>
+                                <?php else:?>
+                                <label>监控配置:</label>
+                                <div id="monitor_add" class="monitored">
+                                    <select class="select1" type="monitor_worker">
+                                        <option value="0"/>选择计算插件
+                                        <?php $worker = isset($L['worker'])?$L['worker']:array();?>
+                                        <?php foreach($worker as $s):?>
+                                            <option value="<?php echo $s['id'];?>"
+                                                    <?php if(isset($v['workerid']) AND $s['id'] == $v['workerid']) echo "selected='1'";?>" />
+                                                    <?php echo $s['id'].'-'.$s['name'];?>
+                                        <?php endforeach;?>
+                                    </select>
+
+                                    <select class="select1" type="monitor_action">
+                                        <option value="0"/>选择监控行为
+                                        <?php $actions = isset($L['actions'])?$L['actions']:array();?>
+                                        <?php foreach($actions as $s):?>
+                                            <option value="<?php echo $s['id'];?>"
+                                                <?php if(isset($v['actionid']) AND $s['id'] == $v['actionid']) echo "selected='1'";?>" />
+                                                <?php echo $s['id'].'-'.$s['name'];?>
+                                        <?php endforeach;?>
+                                    </select>
+
+                                    <span class="icon-plus"></span>
+                                    <span style="margin-left:10px;display: none;" class="icon-minus"></span>
+                                </div>
+                                <?php endif;?>
+                            </div>
+
+                            <div class="field-box">
+                                <label>采集状态:</label>
+                                <div class="ui-select">
+                                    <select id="monitor_status">
+                                        <?php $status = array('disable','enable');?>
+                                    	<?php foreach($status as $k=>$s):?>
+                                    	<option value="<?php echo $k;?>" 
+                                    		<?php if(isset($L['status']) AND $k == $L['status']) echo "selected='1'";?>" />
+                                    		<?php echo $s;?>
+                                    	<?php endforeach;?>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <button id="config-submit" type="button" class="btn btn-default btn-primary">提交</button>
+                            <a id="config-back" href="/alarm/log">返回</a>
+                        	<div id="tip_submit" class="alert alert-success" style="visibility:hidden;margin-top:10px;font-size:18px;"></div>
+                        </form>
+                        
+                    </div>
+					<!-- end form -->
+                </div>
+            </div>
+        </div>
+        
+<div id="suc" title="" style="visibility:hidden;text-align:center;">
+	<h3>提交成功！</h3>
+	<span></span>
+</div>
+
+<script src="/static/js/select2.min.js"></script>
+<script type="text/javascript"><!--
+$(function () {
+
+    $(".icon-plus").click(function(){
+
+        var _this=$("#tt").children(":eq(1)").clone(true);
+        _this.appendTo("#tt").before("<label></label>");
+        _this.find(".icon-minus").show();
+    });
+
+    $(".icon-minus").click(function(){
+        $(this).parent().prev().remove();
+        $(this).parent().remove();
+    });
+
+    // select2 plugin for select elements
+    /*$(".select2").select2({
+        placeholder: "Select any workers"
+    });*/
+
+	$("#config-submit").click(function(){
+		SubmitForm();
+	});
+
+	/*$("#monitor_test").click(function(){
+		var testurl = $("#monitor_url").val();
+		var testparam = $("#monitor_param").val().split('\n').join('&');
+		$.ajax({
+			url:testurl,
+		    type:'get',
+		    dataType: 'json',
+		 	data: testparam,
+		 	async: false,
+		 	success: function(data){
+			 	if(data.flag == 'success') {
+			 		$("#monitor_result").html(JSON.stringify(data.data));
+				} else if(data.flag == 'error') {
+					$("#monitor_result").html(JSON.stringify(data.msg));
+				} else {
+					$("#monitor_result").html('Unknow error!');
+				}
+	       	}
+		});
+	});*/
+	
+});
+
+function SubmitForm(obj) {
+
+    var monitor_config = [];
+    var config_tmp = [];
+    var _error = 1;
+    $("#tt select").each(function(){
+        if($(this).attr("type") == 'monitor_worker') {
+            var worker=$(this).val();
+            if (worker==0) {_error=0;}
+            config_tmp.push(worker);
+        }
+
+        if($(this).attr("type") == 'monitor_action') {
+
+            var action=$(this).val();
+            if (action==0) {_error=0;}
+            config_tmp.push(action);
+            monitor_config.push(config_tmp);
+            config_tmp = [];
+        }
+    });
+
+    if (_error == 0) {
+        alert("监控配置不能为空！");
+        return;
+    }
+
+	var configData = {
+        logid		: $("#monitor_id").val(),
+	    service		: $("#monitor_service").val(),
+        app		    : $("#monitor_app").val(),
+        hostname    : $("#monitor_hostname").val(),
+        hostip	    : $("#monitor_hostip").val(),
+        logpath	    : $("#monitor_logpath").val(),
+        region	    : $("#monitor_region").val(),
+        status	    : $("#monitor_status").val(),
+        config      : monitor_config,
+	};
+    console.log(JSON.stringify(configData));
+	//提交数据
+	$.ajax({
+		url:'/alarm/logeditok',
+	    type:'post',
+	    dataType: 'json',
+	 	data: configData,
+	 	async: false,
+	 	success: function(data){
+            //alert('hello');
+//            console.log(JSON.stringify(data));
+            $("#tip_submit").css('visibility','visible').attr('class','alert alert-'+data.flag).html(data.msg);
+       	}
+	});
+}
+
+function jqchk(name){  //jquery获取复选框值    
+	  var chk_value =[];    
+	  $('input[name="'+name+'"]:checked').each(function(){    
+		  chk_value.push($(this).val());    
+	  });    
+	  return chk_value.length==0 ? '' : chk_value;   
+}    
+--></script>

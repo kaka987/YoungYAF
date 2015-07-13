@@ -1,0 +1,33 @@
+{
+    "chart": {
+        "type": "column"
+    },
+    "title": {
+        "text": null
+    },
+    "subtitle": {
+        "text": ""
+    },
+    "xAxis": {
+        "title": {
+            "text": "表"
+        }
+    },
+    "yAxis": {
+        "title": {
+            "text": "次数"
+        }
+    },
+    "plotOptions": {
+        "column": {
+            "dataLabels": {
+                "enabled": true
+            },
+            "pointWidth": 30
+        }
+    },
+    "tooltip": {
+        "valueSuffix": "次"
+    },
+    "legend": false
+}

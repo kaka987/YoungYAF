@@ -1,0 +1,20 @@
+<?php
+    $this->title = '监控历史 - 业务监控系统';
+    // Block::display('index_header');
+    $this->sideMenu = 'monitor_history';
+?>
+<div class="container-fluid">
+
+    <div id="pad-wrapper">
+        <div class="row-fluid header">
+            <h3>监控历史</h3>
+            <div class="search span10 pull-right">
+                <div class="form">
+                    <i>从</i><input type="text" id="from_date" placeholder="请选择起始时间"><i class="spacing"></i>
+                    <i>至</i><input type="text" id="to_date" placeholder="请选择结束时间"><i class="spacing"></i>
+                    <a class="btn-flat small" id="filter">筛选</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

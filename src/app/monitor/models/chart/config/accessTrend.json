@@ -1,0 +1,41 @@
+{
+    "chart": {
+        "width": 960,
+        "height": 320,
+        "zoomType": "x"
+    },
+    "title": {
+        "text": null
+    },
+    "subtitle": {
+        "text": ""
+    },
+    "xAxis": {
+        "type": "datetime"
+    },
+    "yAxis": {
+        "title": {
+            "text": "次数"
+        }
+    },
+    "plotOptions": {
+        "line": {
+            "lineWidth": 1,
+            "states": {
+                "hover": {
+                    "lineWidth": 2
+                }
+            },
+            "marker": {
+                "enabled": false
+            }
+        },
+        "series" : {
+            "turboThreshold": 999999999
+        }
+
+    },
+    "tooltip": {
+        "crosshairs": true
+    }
+}

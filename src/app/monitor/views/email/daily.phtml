@@ -1,0 +1,302 @@
+<?php
+    $time = $to - 86400;
+    $this->currentDate = date('Y年m月d日', $time) . Sys_Tools::getWeek($time);
+?>
+<!DOCTYPE html>
+<html>
+	<head>
+	    <title>监控日报</title>
+	    <meta charset=utf-8>
+	    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+	    <style type="text/css">
+	    	html {
+	    		font-family:"Helvetica Neue",Helvetica,"Trebuchet MS",Arial,sans-serif;
+	    	}
+	    	body {
+	    		padding:0 12%;
+	    	}
+	    	i,ul,ol,li,p,div,span {
+	    		font-style: normal;
+	    		text-decoration: none;
+	    		list-style: none;
+	    		padding: 0;
+	    		margin: 0;
+	    	}
+            /* TABLES*/
+
+            table {
+                max-width: 100%;
+                background-color: transparent;
+                border-collapse: collapse;
+                border-spacing: 0;
+            }
+            .table {
+                width: 100%;
+                margin-bottom: 20px;
+            }
+
+            .table th,
+            .table td {
+                padding: 8px;
+                line-height: 20px;
+                text-align: left;
+                vertical-align: top;
+                border-top: 1px solid #dddddd;
+            }
+            .table tbody + tbody {
+                border-top: 2px solid #dddddd;
+            }
+            .table thead{
+                border-top:1px solid #dee3ea;
+            }
+            .table-hover tbody tr:hover > td,
+            .table-hover tbody tr:hover > th {
+                background-color: #f5fafc;
+            }
+            .table th.sortable {
+                cursor: pointer;
+            }
+            .table th.sortable:hover {
+                text-decoration: underline;
+            }
+            .table thead th{
+                font-weight: bold;
+                position: relative;
+                padding-bottom: 20px;
+                padding-top: 5px;
+                text-transform: uppercase;
+                font-size: 11px;
+                vertical-align: top;
+            }
+            .table td{
+                color: #526273;
+                border-top-color: #edf2f7;
+                vertical-align: middle;
+            }
+            .table th.align-right,
+            .table td.align-right {
+                text-align: right;
+                padding-right: 10px !important;
+            }
+            table tr.first td{
+                border-top: 0 none;
+            }
+            table th span.line{
+                position: absolute;
+                top: 0;
+                height: 20px;
+            }
+            .header {
+	    		text-align: center;
+	    		height:80px;
+	    		margin-top: 50px;
+	    	}
+	    	.header .title {
+	    		text-align: center;
+	    		font-size:24px;
+	    		font-weight: bold;
+	    	}
+	    	.content {
+	    		font-size:12px;
+	    	}
+	    	.content .section {
+	    		margin: 20px 0;
+	    		border-bottom: 1px dotted #ccc;
+	    	}
+	    	.content .section .item > .title {
+	    		font-size:16px;
+	    		padding: 10px 0px;
+	    	}
+	    	.content .info {
+	    		color:#2E75B6;
+	    	}
+	    	.content .bold {
+	    		font-weight: bold;
+	    	}
+	    	.content .system {
+	    		margin-top:10px;
+	    		color:#000;
+	    		font-size:18px;
+	    		font-weight: bold;
+	    	}
+	    	.content .section .content {
+	    		margin-bottom: 10px;
+	    	}
+	    	.content .focus {
+	    		font-weight: bold;
+	    	}
+	    	.content .visit {
+	    		padding:2px 0px;
+	    	}
+	    	.content .tip {
+	    		text-align: center;
+	    	}
+	    </style>
+	</head>
+	<body>
+		<div class="header">
+			<div class="title">【业务监控报告】<?php echo $this->currentDate ?></div>
+		</div>
+		<div class="content">
+			<div class="tip info">温馨提醒：该报告数据目前来自新加坡地区，红色标记为需要关注点，数据仅供参考，有任何问题请随时联系我们，谢谢！</div>
+			<div class="section">
+                <div class="system">(<?php echo $host ?>)</div>
+				<div class="item">
+					<div class="info bold title">一、访问总量</div>
+					<div class="content">
+						<div class="visit">页面请求数: <span class="focus"><?php echo number_format($data['page_visit']) ?></span></div>
+						<div class="visit">错误请求数: <span class="focus"><?php echo number_format($data['error_visit']) ?></span></div>
+					</div>
+				</div>
+
+				<div class="item">
+					<div class="info bold title">二、访问趋势</div>
+					<div class="content">
+                        <?php
+                        echo '<img src="/api/chart/screen?type=access_trend&from='.
+                            date("Y-m-d", $trendFrom).'&to='.
+                            date('Y-m-d', $to).
+                            (empty($host) ? "" : "&host=".$host).
+                            '" />';
+                        ?>
+						<div class="visit">最高：<span class="focus"><?php echo date('H:i', $data['minute_max']['time']) ?></span>，请求量：<span class="focus"><?php echo number_format($data['minute_max']['num']) ?></span>次</div>
+						<div class="visit">最低：<span class="focus"><?php echo date('H:i', $data['minute_min']['time']) ?></span>，请求量：<span class="focus"><?php echo number_format($data['minute_min']['num']) ?></span>次</div>
+				</div>
+
+				<div class="item">
+					<div class="info bold title">三、错误量TOP10</div>
+					<div class="content">
+                        <table class="table table-hover">
+                            <thead>
+                            <tr>
+                                <th class="sortable">
+                                    <span class="line">Host</span>
+                                </th>
+                                <th class="sortable">
+                                    <span class="line">Path</span>
+                                </th>
+                                <th class="sortable">
+                                    <span class="line">Status</span>
+                                </th>
+                                <th class="sortable">
+                                    <span class="line">Num</span>
+                                </th>
+                            </tr>
+                            </thead>
+                            <tbody class="list-body">
+                            <?php
+                                foreach ($data['error_list']['data'] AS $list) {
+                            ?>
+                                <tr>
+                                    <td>
+                                        <span title="<?php echo $list['host'] ?>"><?php echo $list['host'] ?></span>
+                                    </td>
+                                    <td>
+                                        <span title="<?php echo $list['path'] ?>"><?php echo $list['path'] ?></span>
+                                    </td>
+                                    <td>
+                                        <span title="<?php echo $list['status'] ?>"><?php echo $list['status'] ?></span>
+                                    </td>
+                                    <td>
+                                        <span title="<?php echo number_format($list['num']) ?>"><?php echo number_format($list['num']) ?></span>
+                                    </td>
+                                </tr>
+                            <?php
+                                }
+                            ?>
+                            </tbody>
+                        </table>
+					</div>
+				</div>
+
+				<div class="item">
+					<div class="info bold title">四、接口响应耗时Top10</div>
+					<div class="content">
+                        <table class="table table-hover">
+                            <thead>
+                            <tr>
+                                <th class="sortable">
+                                    <span class="line">Host</span>
+                                </th>
+                                <th class="sortable">
+                                    <span class="line">Path</span>
+                                </th>
+                                <th class="sortable">
+                                    <span class="line">Max</span>
+                                </th>
+                                <th class="sortable">
+                                    <span class="line">Avg</span>
+                                </th>
+                            </tr>
+                            </thead>
+                            <tbody class="list-body">
+                            <?php
+                            foreach ($data['times_list']['data'] AS $list) {
+                                ?>
+                                <tr>
+                                    <td>
+                                        <span title="<?php echo $list['host'] ?>"><?php echo $list['host'] ?></span>
+                                    </td>
+                                    <td>
+                                        <span title="<?php echo $list['path'] ?>"><?php echo $list['path'] ?></span>
+                                    </td>
+                                    <td>
+                                        <span title="<?php echo $list['max_response_time'] ?>"><?php echo $list['max_response_time'] ?></span>
+                                    </td>
+                                    <td>
+                                        <span title="<?php echo $list['avg_response_time'] ?>"><?php echo $list['avg_response_time'] ?></span>
+                                    </td>
+                                </tr>
+                            <?php
+                            }
+                            ?>
+                            </tbody>
+                        </table>
+					</div>
+				</div>
+
+				<div class="item">
+					<div class="info bold title">五、访问流量TOP10</div>
+					<div class="content">
+                        <table class="table table-hover">
+                            <thead>
+                            <tr>
+                                <th class="sortable">
+                                    <span class="line">Host</span>
+                                </th>
+                                <th class="sortable">
+                                    <span class="line">Path</span>
+                                </th>
+                                <th class="sortable">
+                                    <span class="line">Size</span>
+                                </th>
+                            </tr>
+                            </thead>
+                            <tbody class="list-body">
+                            <?php
+                            foreach ($data['size_list']['data'] AS $list) {
+                                ?>
+                                <tr>
+                                    <td>
+                                        <span title="<?php echo $list['host'] ?>"><?php echo $list['host'] ?></span>
+                                    </td>
+                                    <td>
+                                        <span title="<?php echo $list['path'] ?>"><?php echo $list['path'] ?></span>
+                                    </td>
+                                    <td>
+                                        <span title="<?php echo Sys_Common::convertSize($list['size']) ?>"><?php echo Sys_Common::convertSize($list['size']) ?></span>
+                                    </td>
+                                </tr>
+                            <?php
+                            }
+                            ?>
+                            </tbody>
+                        </table>
+				    </div>
+				</div>
+
+			</div>
+		</div>
+	</body>
+</html>

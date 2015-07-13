@@ -1,0 +1,345 @@
+<?php
+	$this->title = '监控报警 - 业务监控系统';
+	$this->sideMenu = 'admin';
+	$this->subMenu = 'alarm_edit';
+    $D = isset($L[0]) ? $L[0] : array();
+?>
+
+<style type="text/css">
+label{
+	display: inline-block;
+	float: left;
+	font-weight: 600;
+	cursor: auto;
+	font-size: 12px;
+	width: 150px;
+	text-align: left;
+}
+
+.field-box {
+	margin-bottom: 30px;
+	margin-left: 0;
+	float: left;
+	width: 100%;
+}
+#config-back {
+	margin-left:10px;
+}
+
+a {
+	cursor:pointer;
+}
+
+</style>
+<link href="/static/css/lib/select2.css" type="text/css" rel="stylesheet" />
+<div class="container-fluid">
+            <div id="pad-wrapper" class="form-page">
+            	<h3>监控配置-<?php if(isset($D['id'])) echo '编辑';else echo '新增';?></h3>
+            	<hr/>
+                <div class="row-fluid form-wrapper">
+                    <!-- left column -->
+                    <div class="span8 column">
+                        <form id="monitor-config-form" class="form-horizontal" role="form" onsubmit="return SubmitForm(this);" />
+                            <input type="hidden" id="monitor_id" value="<?php echo isset($D['id'])?$D['id']:'';?>" /> 
+                                                        
+                            <h4>监控服务配置</h4><hr/>
+                            <div class="field-box">
+                                <label>日志源ID:</label>
+                                <div class="ui-select">
+                                    <select id="monitor_app">
+                                    	<?php $apps = $L['log'];?>
+                                    	<?php foreach($apps as $app):?>
+                                    	<option value="<?php echo $app['id'];?>" 
+                                    		<?php if(isset($app['id']) AND isset($D['monitor_app']) AND $app['id'] == $D['monitor_app']) echo "selected='1'";?>" />
+                                    		<?php echo $app['id'],' - ',$app['monitor_app'];?>
+                                    	<?php endforeach;?>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="field-box">
+                                <label>监控服务:</label>
+                                <input id="monitor_service" class="span8 inline-input" value="<?php echo (isset($D['monitor_service']) AND $D['monitor_service'])?$D['monitor_service']:'';?>" data-toggle="tooltip" data-trigger="focus" title="填写监控服务名称" data-placement="right" type="text" />
+                            </div>                            
+                            <div class="field-box">
+                                <label>监控状态:</label>
+                                <div class="ui-select">
+                                    <select id="monitor_status">
+                                        <?php $status = array('disable','enable');?>
+                                    	<?php foreach($status as $k=>$s):?>
+                                    	<option value="<?php echo $k;?>" 
+                                    		<?php if(isset($D['monitor_status']) AND $k == $D['monitor_status']) echo "selected='1'";?>" />
+                                    		<?php echo $s;?>
+                                    	<?php endforeach;?>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="field-box">
+                                <label>检测间隔:</label>
+                                <input id="monitor_check" class="input-large" value="<?php echo (isset($D['monitor_check']) AND $D['monitor_check']) ? $D['monitor_check']:'';?>" data-toggle="tooltip" data-trigger="focus" title="监控检测间隔" data-placement="right" type="text" />
+                            	<span class="add-on"> * 60 seconds</span>
+                            </div>
+
+                            <div class="field-box">
+                                <label>匹配规则:</label>
+                                <input id="monitor_url" class="span8 inline-input" value="<?php echo (isset($D['monitor_url']) AND $D['monitor_url'])?($D['monitor_url']):''; ?>" data-toggle="tooltip" data-trigger="focus" title="请输入日志结构化规则" data-placement="right" type="text" />
+                            </div>
+                            
+                            <div class="field-box">
+                                <label>检测接口:</label>
+                                <div class="ui-select">
+                                    <select id="monitor_api">
+                                    	<?php foreach($L['api'] as $k=>$s):?>
+                                    	<option value="<?php echo $k;?>" 
+                                    		<?php if(isset($D['monitor_api']) AND $k == $D['monitor_api']) echo "selected='1'";?>" />
+                                    		<?php echo $k;?>
+                                    	<?php endforeach;?>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="field-box">
+                                <label>检测参数:</label>
+                                <textarea id="monitor_param" class="span8" rows="4"><?php echo (isset($D['monitor_param']) AND $D['monitor_param'])?$D['monitor_param']:'';?></textarea>
+                            </div>
+                            
+                            <!--
+                            <div class="field-box">
+                                <label>检测测试:</label>
+                                <a id="monitor_test">点击我</a>
+                                <span id="monitor_result" style="margin-left:10px;font-size:13px;"></span>
+                            </div>
+							-->
+							<hr/>
+							<h4>报警发送配置</h4>
+							<hr/>
+                            <div class="field-box">
+                                <label>报警状态:</label>
+                                <div class="ui-select">
+                                    <select id="notify_status">
+                                        <?php $status = array('disable','enable');?>
+                                    	<?php foreach($status as $k=>$s):?>
+                                    	<option value="<?php echo $k;?>" 
+                                    		<?php if(isset($D['notify_status']) AND $k == $D['notify_status']) echo "selected='1'";?>" />
+                                    		<?php echo $s;?>
+                                    	<?php endforeach;?>
+                                    </select>
+                                </div>                             
+                            </div>
+                            
+                            <!--<div class="field-box">
+                                <label>报警接收人:</label>
+                                <textarea id="notify_contact" class="span8" rows="4"><?php echo (isset($D['notify_contact']) AND $D['notify_contact'])?$D['notify_contact']:'';?></textarea>
+                            </div>-->
+                            
+                            <div class="field-box">
+                                <label>报警接收人:</label>
+                                <select style="width:250px" multiple="" id="notify_userid" class="select2">
+                                    <option />
+                                    <?php if($D['ouser']):?>
+                                    <?php if(isset($D['notify_userid'])) $users = explode(',',$D['notify_userid']);?>
+                                    <?php foreach($D['ouser'] as $user):?>
+                                    	<option value="<?php echo $user['id']?>" 
+                                    	<?php if(in_array($user['id'], $users)) echo 'selected="1"';?>
+                                    	/><?php echo $user['fullname'].'-'.$user['aliasname'];?>
+                                    <?php endforeach;?>
+                                    <?php endif;?>
+                                </select>
+                            </div>
+                            <div class="field-box">
+                                <label>报警接收组:</label>
+                                <select style="width:250px" multiple="" id="notify_groupid" class="select2">
+                                    <option />
+                                   	<?php if($D['ogroup']):?>
+                                    <?php if(isset($D['notify_groupid'])) $groups = explode(',',$D['notify_groupid']);?>
+                                    <?php foreach($D['ogroup'] as $group):?>
+                                    	<option value="<?php echo $group['id']?>" 
+                                    	<?php if(in_array($group['id'], $groups)) echo 'selected="1"';?>
+                                    	/><?php echo $group['groupname']?>
+                                    <?php endforeach;?>
+                                    <?php endif;?>
+                                </select>
+                            </div>
+                            
+                            <!--<div class="field-box">
+                                <label>报警接收人:</label>
+                                <select id="notify_contact" style="width:250px" multiple="multiple" class="select2">
+                                    	<?php 
+                                    		$contacts = array(
+                                    			'young'		=> 'young@yeahmobi.com',
+                                    			'zhangy'	=> 'zhangy@yeahmobi.com'
+                                    			);
+										?>
+                                    	<?php foreach($contacts as $c):?>
+                                    	<option value="<?php echo $c;?>" 
+                                    		<?php 
+                                    			if (isset($D['notify_contact'])) {
+                                    				$contacted = explode(',', $D['notify_contact']);
+                                    				if(in_array($c, $contacted)) echo "selected='1'";
+                                    			}
+                                    		?> 
+                                    	/>
+                                    		<?php echo $c;?>
+                                    	<?php endforeach;?>
+                                </select>
+                            </div>
+                            -->
+                            
+                            <div class="field-box" id="notify_method">
+                                <label>报警接收方式:</label>
+                                <?php $types=array('email','sms');?>
+                                <?php foreach($types as $type):?>
+                                <label class="checkbox">
+                                    <input name="notify_method" type="checkbox" value="<?php echo $type;?>" 
+                                    	<?php
+                                    		if (isset($D['notify_method'])) {
+                                    			$typed = explode(',', $D['notify_method']);
+                                    			if(in_array($type, $typed)) echo "checked='1'";
+                                    		}
+                                    	?>
+                                    />
+                                    	<?php echo $type;?>
+                                </label>
+                                <?php endforeach;?>
+                            </div>
+                            
+                            <div class="field-box" id="notify_type">
+                                <label>报警类型:</label>
+                                <?php $types=array('warning','critical','unknown','recovery');?>
+                                <?php foreach($types as $type):?>
+                                <label class="checkbox">
+                                    <input name="notify_type" type="checkbox" value="<?php echo $type;?>" 
+                                    	<?php
+                                    		if(isset($D['notify_type'])) {
+                                    			$typed = explode(',', $D['notify_type']);
+                                    			if(in_array($type, $typed)) echo "checked='1'";
+                                    		}	
+                                    	?>
+                                    />
+                                    	<?php echo $type;?>
+                                </label>
+                                <?php endforeach;?>
+                            </div>
+                            
+                            <div class="field-box">
+                                <label>接收时间段:</label>
+                                <div class="ui-select">
+                                    <select id="notify_period">
+                                    	<?php $periods = array('alltime','worktime','noworktime');?>
+                                    	<?php foreach($periods as $p):?>
+                                    	<option value="<?php echo $p;?>" 
+                                    		<?php if(isset($D['notify_period']) AND $p == $D['notify_period']) echo "selected='1'";?>" />
+                                    		<?php echo $p;?>
+                                    	<?php endforeach;?>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            
+                            <div class="field-box">
+                                <label>报警发送间隔:</label>
+                                <input id="notify_interval" value="<?php echo isset($D['notify_interval'])?$D['notify_interval']:'';?>" class="input-large" type="text" />
+                            	<span class="add-on"> * 60 seconds</span>
+                            </div> 
+                            
+                            
+                            <div class="field-box">
+                                <label>备注:</label>
+                                <textarea id="notify_other" class="span8" rows="4"><?php echo isset($D['notify_other'])?$D['notify_other']:'';?></textarea>
+                            </div>
+                            <button id="config-submit" type="button" class="btn btn-default btn-primary">提交</button>
+                            <a id="config-back" href="/alarm/set">返回</a>
+                        	<div id="tip_submit" class="alert alert-success" style="visibility:hidden;margin-top:10px;font-size:18px;"></div>
+                        </form>
+                        
+                    </div>
+					<!-- end form -->
+                </div>
+            </div>
+        </div>
+        
+<div id="suc" title="" style="visibility:hidden;text-align:center;">
+	<h3>提交成功！</h3>
+	<span></span>
+</div>        
+<script src="/static/js/select2.min.js"></script>
+<script type="text/javascript">
+$(function () {
+
+	// select2 plugin for select elements
+    $(".select2").select2({
+        placeholder: "Select a State"
+    });
+
+	
+	$("#config-submit").click(function(){
+		SubmitForm();
+	});
+
+	$("#monitor_test").click(function(){
+		var testurl = $("#monitor_url").val();
+		var testparam = $("#monitor_param").val().split('\n').join('&');
+		$.ajax({
+			url:testurl,
+		    type:'get',
+		    dataType: 'json',
+		 	data: testparam,
+		 	async: false,
+		 	success: function(data){
+			 	if(data.flag == 'success') {
+			 		$("#monitor_result").html(JSON.stringify(data.data));
+				} else if(data.flag == 'error') {
+					$("#monitor_result").html(JSON.stringify(data.msg));
+				} else {
+					$("#monitor_result").html('Unknow error!');
+				}
+	       	}
+		});
+	});
+	
+});
+
+function SubmitForm(obj) {
+	var configData = {
+			monitor_id		: $("#monitor_id").val(),
+			monitor_app		: $("#monitor_app").val(),
+			monitor_service	: $("#monitor_service").val(),
+			monitor_status	: $("#monitor_status").val(),
+			monitor_check	: $("#monitor_check").val(),
+			monitor_retry	: $("#monitor_retry").val(),
+			monitor_url		: $("#monitor_url").val(),
+			monitor_api		: $("#monitor_api").val(),
+			monitor_param	: $("#monitor_param").val(),
+			notify_status	: $("#notify_status").val(),
+			notify_contact	: $("#notify_contact").val(),//obj.notify_contact.value,
+			notify_userid	: $("#notify_userid").val(),
+			notify_groupid	: $("#notify_groupid").val(),
+			notify_method	: jqchk('notify_method'),
+			notify_type		: jqchk('notify_type'),
+			notify_period	: $("#notify_period").val(),
+			notify_interval	: $("#notify_interval").val(),
+			notify_other	: $("#notify_other").val(),
+			};
+
+	//提交数据
+	$.ajax({
+		url:'/alarm/save',
+	    type:'post',
+	    dataType: 'json',
+	 	data: configData,
+	 	async: false,
+	 	success: function(data){
+            console.log(data.flag);
+            $("#tip_submit").css('visibility','visible').attr('class','alert alert-'+data.flag).html(data.msg);
+       	}
+	});
+}
+
+function jqchk(name){  //jquery获取复选框值    
+	  var chk_value =[];    
+	  $('input[name="'+name+'"]:checked').each(function(){    
+		  chk_value.push($(this).val());    
+	  });    
+	  return chk_value.length==0 ? '' : chk_value;   
+}    
+</script>

@@ -1,0 +1,265 @@
+<?php
+	$this->title = '监控行为管理 - 业务监控系统';
+	$this->sideMenu = 'admin';
+	$this->subMenu = 'alarm_action';
+?>
+<link href="/static/js/chosen/chosen.min.css" rel="stylesheet" />
+<style type="text/css">
+label{
+	display: inline-block;
+	float: left;
+	font-weight: 600;
+	cursor: auto;
+	font-size: 12px;
+	width: 150px;
+	text-align: left;
+}
+
+.field-box {
+	margin-bottom: 30px;
+	margin-left: 0;
+	float: left;
+	width: 100%;
+}
+#config-back {
+	margin-left:10px;
+}
+
+a {
+	cursor:pointer;
+}
+
+</style>
+<div class="container-fluid">
+            <div id="pad-wrapper" class="form-page">
+            	<h3>监控行为管理-<?php if(isset($D['id'])) echo '编辑';else echo '新增';?></h3>
+            	<hr/>
+                <div class="row-fluid form-wrapper">
+                    <!-- left column -->
+                    <div class="span10 column">
+                        <form id="monitor-config-form" class="form-horizontal" role="form" onsubmit="return SubmitForm(this);" />
+                            <input type="hidden" id="id" value="<?php echo isset($D['id'])?$D['id']:'';?>" /> 
+                                                        
+                            <div class="field-box">
+                                <label>名称:</label>
+                                <input id="name" class="span5 inline-input" value="<?php echo (isset($D['name']) AND $D['name']) ? $D['name']:'';?>" data-toggle="tooltip" data-trigger="focus" title="监控行为名称" data-placement="right" type="text" />
+                            </div>
+
+                            <div class="field-box">
+                                <label>监控业务:</label>
+                                <select id="apps">
+                                    <option />请选择
+                                    <?php if($D['appsAll']):?>
+                                        <?php foreach($D['appsAll'] as $app):?>
+                                            <option value="<?php echo $app['service']?>"
+                                            <?php if(isset($D['apps']) AND ($app['service']==$D['apps'])) echo 'selected="1"';?>
+                                            /><?php echo $app['service']?>
+                                        <?php endforeach;?>
+                                    <?php endif;?>
+                                </select>
+                            </div>
+
+                            <div class="field-box">
+                                <label>监控状态:</label>
+                                <div class="ui-select">
+                                    <select id="status">
+                                        <?php $status = array('disable','enable');?>
+                                        <?php foreach($status as $k=>$s):?>
+                                            <option value="<?php echo $k;?>"
+                                                    <?php if(isset($D['status']) AND $k == $D['status']) echo "selected='1'";?>" />
+                                                    <?php echo $s;?>
+                                                <?php endforeach;?>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="field-box">
+                                <label>监控对象:</label>
+                                <div class="ui-select">
+                                    <select id="workers">
+                                        <option />请选择
+                                        <?php if($D['workersAll']):?>
+                                            <?php foreach($D['workersAll'] as $app):?>
+                                                <option value="<?php echo $app['id']?>"
+                                                <?php if(isset($D['workers']) AND ($app['id']==$D['workers'])) echo 'selected="1"';?>
+                                                /><?php echo $app['id']."-".$app['name']?>
+                                            <?php endforeach;?>
+                                        <?php endif;?>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="field-box">
+                                <label>唯一健值:</label>
+                                <input id="cols" class="span5 inline-input"
+                                       value="<?php echo (isset($D['cols']) AND $D['cols']) ? $D['cols']:'';?>"
+                                       data-toggle="tooltip" data-trigger="focus" title="事件的唯一性标识"
+                                       data-placement="right" type="text" />
+                            </div>
+
+                            <div class="field-box">
+                                <label>详情字段:</label>
+                                <input id="detail" class="span5 inline-input"
+                                       value="<?php echo (isset($D['detail']) AND $D['detail']) ? $D['detail']:'';?>"
+                                       data-toggle="tooltip" data-trigger="focus" title="事件的详情唯一性标识"
+                                       data-placement="right" type="text" />
+                            </div>
+
+
+                            <div class="field-box">
+                                <label>统计方法:</label>
+                                <input id="method" class="span5 inline-input"
+                                       value="<?php echo (isset($D['method']) AND $D['method']) ? $D['method']:'';?>"
+                                       data-toggle="tooltip" data-trigger="focus"
+                                       title="数据统计方法(sum(num)/max(num))" data-placement="right" type="text" />
+                            </div>
+
+                            <div class="field-box">
+                                <label>Where条件:</label>
+                                <input id="actions" class="span5 inline-input"
+                                       value="<?php echo (isset($D['actions']) AND $D['actions']) ? $D['actions']:'';?>"
+                                       data-toggle="tooltip" data-trigger="focus"
+                                       title="监控行为(产生event事件的sql条件)" data-placement="right" type="text" />
+                            </div>
+
+                            <div class="field-box">
+                                <label>限定条件:</label>
+                                <input id="key1" class="span5 inline-input"
+                                       va
+                                       lue="<?php echo (isset($D['key1']) AND $D['key1']) ? $D['key1']:'';?>"
+                                       data-toggle="tooltip" data-trigger="focus" title="如group by/order by"
+                                       data-placement="right" type="text" />
+                            </div>
+                            
+
+                            <div class="field-box">
+                                <label>行为定时:</label>
+                                <input id="clock" class="span5 inline-input"
+                                       value="<?php echo (isset($D['clock']) AND $D['clock']) ? $D['clock']:'';?>"
+                                       data-toggle="tooltip" data-trigger="focus" title="定时设置（默认）"
+                                       data-placement="right" type="text" />
+                            </div>
+
+                            <div class="field-box">
+                                <label>阈值比较:</label>
+                                <input id="alertRelation" class="span5 inline-input"
+                                       value="<?php echo (isset($D['alertRelation']) AND $D['alertRelation']) ? $D['alertRelation']:'';?>"
+                                       data-toggle="tooltip" data-trigger="focus"
+                                       title="alertRelation" data-placement="right" type="text" />
+                            </div>
+
+                            <div class="field-box">
+                                <label>WARNING:</label>
+                                <input id="warning" class="span5 inline-input"
+                                       value="<?php echo (isset($D['warning']) AND $D['warning']) ? $D['warning']:'';?>"
+                                       data-toggle="tooltip" data-trigger="focus"
+                                       title="warning" data-placement="right" type="text" />
+                            </div>
+
+                            <div class="field-box">
+                                <label>CRITICAL:</label>
+                                <input id="critical" class="span5 inline-input"
+                                       value="<?php echo (isset($D['critical']) AND $D['critical']) ? $D['critical']:'';?>"
+                                       data-toggle="tooltip" data-trigger="focus"
+                                       title="critical" data-placement="right" type="text" />
+                            </div>
+
+                            <div class="field-box">
+                                <label>说明:</label>
+                                <textarea id="desc" class="span8" rows="4"><?php echo (isset($D['desc']) AND $D['desc'])?$D['desc']:'';?></textarea>
+                            </div>
+
+                            <button id="config-submit" type="button" class="btn btn-default btn-primary">提交</button>
+                            <a id="config-back" href="/alarm/action">返回</a>
+                        	<div id="tip_submit" class="alert alert-success" style="visibility:hidden;margin-top:10px;font-size:18px;"></div>
+                        </form>
+                        
+                    </div>
+					<!-- end form -->
+                </div>
+            </div>
+        </div>
+        
+<div id="suc" title="" style="visibility:hidden;text-align:center;">
+	<h3>提交成功！</h3>
+	<span></span>
+</div>
+
+<script src="/static/js/chosen/chosen.jquery.min.js"></script>
+<script type="text/javascript">
+$(function () {
+
+    $(".chosen-select").chosen({
+        no_results_text: "Oops, nothing found!",
+        width: "45%",
+        disable_search: false,
+    });
+	
+	$("#config-submit").click(function(){
+		SubmitForm();
+	});
+
+	$("#monitor_test").click(function(){
+		var testurl = $("#monitor_url").val();
+		var testparam = $("#monitor_param").val().split('\n').join('&');
+		$.ajax({
+			url:testurl,
+		    type:'get',
+		    dataType: 'json',
+		 	data: testparam,
+		 	async: false,
+		 	success: function(data){
+			 	if(data.flag == 'success') {
+			 		$("#monitor_result").html(JSON.stringify(data.data));
+				} else if(data.flag == 'error') {
+					$("#monitor_result").html(JSON.stringify(data.msg));
+				} else {
+					$("#monitor_result").html('Unknow error!');
+				}
+	       	}
+		});
+	});
+	
+});
+
+function SubmitForm(obj) {
+	var configData = {
+        id				: $("#id").val(),
+        name		    : $("#name").val(),
+        apps		    : $("#apps").val(),
+        status		    : $("#status").val(),
+        workers		    : $("#workers").val(),
+        cols		    : $("#cols").val(),
+        detail		    : $("#detail").val(),
+        key1		    : $("#key1").val(),
+        actions			: $("#actions").val(),
+        method			: $("#method").val(),
+        clock			: $("#clock").val(),
+        alertRelation   : $("#alertRelation").val(),
+        warning			: $("#warning").val(),
+        critical		: $("#critical").val(),
+        desc	        : $("#desc").val()
+		};
+	console.log(configData);
+	//提交数据
+	$.ajax({
+		url:'/alarm/action?o=add',
+	    type:'post',
+	    dataType: 'json',
+	 	data: configData,
+	 	async: false,
+	 	success: function(data){
+            console.log(data.flag);
+            $("#tip_submit").css('visibility','visible').attr('class','alert alert-'+data.flag).html(data.msg);
+       	}
+	});
+}
+
+function jqchk(name){  //jquery获取复选框值    
+	  var chk_value =[];    
+	  $('input[name="'+name+'"]:checked').each(function(){    
+		  chk_value.push($(this).val());    
+	  });    
+	  return chk_value.length==0 ? '' : chk_value;   
+}    
+</script>
